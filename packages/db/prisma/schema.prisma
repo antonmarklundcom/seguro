@@ -1,0 +1,167 @@
+// Prisma schema for the seguro.com.py lead engine.
+// See docs/05-lead-engine.md for the design rationale.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  PARTIAL
+  VALID
+  INVALID
+  DUPLICATE
+  ROUTED
+  ROUTED_NONE
+  DELIVERED
+  ACCEPTED
+  REJECTED
+  SOLD
+}
+
+enum DeliveryChannel {
+  WEBHOOK
+  EMAIL
+  WHATSAPP
+  SHEET
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  CONFIRMED
+  FAILED
+}
+
+enum DeliveryOutcome {
+  ACCEPTED
+  REJECTED
+  SOLD
+}
+
+/// A product line, e.g. seguro-de-auto, seguro-de-moto, prestamo-personal.
+/// The `fields` JSON describes the funnel schema for this vertical so new
+/// verticals are a data change, not a code change (docs/02, docs/09).
+model Vertical {
+  id        String   @id // slug, e.g. "seguro-de-auto"
+  siteId    String   // which tenant/domain this belongs to, e.g. "seguro.com.py"
+  name      String
+  fields    Json     // zod-serializable funnel field schema
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads             Lead[]
+  partnerVerticals  PartnerVertical[]
+
+  @@index([siteId])
+}
+
+model Lead {
+  id         String     @id @default(cuid())
+  verticalId String
+  vertical   Vertical   @relation(fields: [verticalId], references: [id])
+  status     LeadStatus @default(NEW)
+
+  // Contact
+  name  String?
+  phone String // E.164, e.g. +595...
+  email String?
+  city  String?
+
+  // Vertical-specific answers, validated against Vertical.fields at write time.
+  payload Json
+
+  // Attribution — first-class, never lost (docs/04, docs/05).
+  gclid       String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  landingPage String?
+  abVariant   String?
+  referrer    String?
+  device      String?
+  ip          String? // retention-limited; purge per privacy policy
+
+  // Null until the final funnel step (explicit consent checkbox) is
+  // submitted — partial leads (status PARTIAL) are captured before consent
+  // exists and must never be delivered to a partner (docs/05).
+  consentAt      DateTime?
+  consentText    String?
+  consentVersion String?
+
+  score Int? // 0-100, see docs/05 scoring section
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deliveries LeadDelivery[]
+
+  @@index([verticalId, status])
+  @@index([phone, verticalId])
+  @@index([createdAt])
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  active    Boolean  @default(true)
+  channels  Json // [{ type: "webhook" | "email" | "whatsapp" | "sheet", config: {...} }]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  partnerVerticals PartnerVertical[]
+  deliveries       LeadDelivery[]
+}
+
+/// Routing configuration for a (partner, vertical) pair.
+model PartnerVertical {
+  id         String @id @default(cuid())
+  partnerId  String
+  partner    Partner  @relation(fields: [partnerId], references: [id])
+  verticalId String
+  vertical   Vertical @relation(fields: [verticalId], references: [id])
+
+  cplGs      Int // price per lead, guaraníes
+  exclusive  Boolean @default(false)
+  maxShared  Int     @default(3)
+  dailyCap   Int?
+  monthlyCap Int?
+  priority   Int     @default(100) // lower = routed first
+  weight     Int     @default(1) // weighted round-robin within same priority
+  filters    Json    @default("{}") // e.g. {"city": ["asuncion"], "minCarYear": 2015}
+  active     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([partnerId, verticalId])
+  @@index([verticalId, active, priority])
+}
+
+model LeadDelivery {
+  id          String          @id @default(cuid())
+  leadId      String
+  lead        Lead            @relation(fields: [leadId], references: [id])
+  partnerId   String
+  partner     Partner         @relation(fields: [partnerId], references: [id])
+  channel     DeliveryChannel
+  status      DeliveryStatus  @default(PENDING)
+  attempts    Json            @default("[]") // [{at, ok, error?}]
+  billableGs  Int // snapshot of CPL at delivery time
+  outcome     DeliveryOutcome?
+  outcomeNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([partnerId, status])
+}

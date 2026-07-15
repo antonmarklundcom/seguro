@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: seguro
+      POSTGRES_PASSWORD: seguro
+      POSTGRES_DB: seguro
+    ports:
+      - "5432:5432"
+    volumes:
+      - seguro_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - seguro_redis_data:/data
+
+volumes:
+  seguro_postgres_data:
+  seguro_redis_data:
