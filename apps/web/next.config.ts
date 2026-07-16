@@ -1,8 +1,12 @@
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@seguro/ui", "@seguro/config", "@seguro/shared"],
+  transpilePackages: ["@seguro/ui", "@seguro/config", "@seguro/shared", "@seguro/tracking"],
   reactStrictMode: true,
+  pageExtensions: ["ts", "tsx", "mdx"],
 };
 
-export default nextConfig;
+const withMDX = createMDX({});
+
+export default withMDX(nextConfig);

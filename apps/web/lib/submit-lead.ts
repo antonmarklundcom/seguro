@@ -1,6 +1,10 @@
 "use client";
 
-import type { Attribution, LeadPartialInput, LeadSubmitInput } from "@seguro/shared";
+import type {
+  Attribution,
+  LeadPartialInput,
+  LeadSubmitInput,
+} from "@seguro/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -26,7 +30,9 @@ const PARAM_MAP: Record<(typeof UTM_KEYS)[number], string> = {
 export function captureAttribution(): void {
   if (typeof window === "undefined") return;
   const params = new URLSearchParams(window.location.search);
-  const stored = JSON.parse(sessionStorage.getItem("seguro_attribution") ?? "{}");
+  const stored = JSON.parse(
+    sessionStorage.getItem("seguro_attribution") ?? "{}",
+  );
 
   let changed = false;
   for (const key of UTM_KEYS) {
@@ -54,7 +60,12 @@ export function getStoredAttribution(): Record<string, string> {
   }
 }
 
-async function postJson(path: string, body: unknown) {
+interface LeadSubmitResponse {
+  id: string | null;
+  status: string;
+}
+
+async function postJson<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -64,14 +75,16 @@ async function postJson(path: string, body: unknown) {
     const text = await res.text();
     throw new Error(`Request failed (${res.status}): ${text}`);
   }
-  return res.json();
+  return res.json() as Promise<T>;
 }
 
 type LeadSubmitCore = Omit<LeadSubmitInput, keyof Attribution>;
 
-export async function submitLead(input: LeadSubmitCore) {
+export async function submitLead(
+  input: LeadSubmitCore,
+): Promise<LeadSubmitResponse> {
   const attribution = getStoredAttribution();
-  return postJson("/v1/leads", {
+  return postJson<LeadSubmitResponse>("/v1/leads", {
     ...input,
     ...attribution,
     referrer: typeof document !== "undefined" ? document.referrer : undefined,
@@ -79,7 +92,9 @@ export async function submitLead(input: LeadSubmitCore) {
   });
 }
 
-export async function submitPartialLead(input: LeadPartialInput) {
+export async function submitPartialLead(
+  input: LeadPartialInput,
+): Promise<{ id?: string; status: string }> {
   const attribution = getStoredAttribution();
   return postJson("/v1/leads/partial", { ...input, ...attribution });
 }

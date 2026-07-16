@@ -2,13 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { FunnelField, VerticalConfig } from "@seguro/config";
-import { captureAttribution, submitLead, submitPartialLead } from "@/lib/submit-lead";
+import { trackEvent } from "@seguro/tracking";
+import {
+  captureAttribution,
+  submitLead,
+  submitPartialLead,
+} from "@/lib/submit-lead";
 
 export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
   const steps = useMemo(() => {
-    const stepNumbers = Array.from(new Set(vertical.fields.map((f) => f.step))).sort(
-      (a, b) => a - b,
-    );
+    const stepNumbers = Array.from(
+      new Set(vertical.fields.map((f) => f.step)),
+    ).sort((a, b) => a - b);
     return stepNumbers.map((step) => ({
       step,
       fields: vertical.fields.filter((f) => f.step === step),
@@ -18,11 +23,15 @@ export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "done" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     captureAttribution();
+    trackEvent.funnelStart(vertical.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentStep = steps[stepIndex];
@@ -52,6 +61,7 @@ export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
       await handleSubmit();
       return;
     }
+    trackEvent.funnelStep(vertical.id, currentStep.step + 1);
     setStepIndex((i) => Math.min(i + 1, steps.length - 1));
   }
 
@@ -68,7 +78,7 @@ export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
     setErrorMessage(null);
     try {
       const { name, phone, email, city, ...rest } = answers;
-      await submitLead({
+      const result = await submitLead({
         verticalId: vertical.id,
         name,
         phone: phone ?? "",
@@ -77,10 +87,17 @@ export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
         payload: rest,
         consent: true,
       });
+      if (result.id) {
+        trackEvent.leadSubmit(vertical.id, result.id);
+      }
       setStatus("done");
     } catch (err) {
       setStatus("error");
-      setErrorMessage(err instanceof Error ? err.message : "Ocurrio un error, intenta de nuevo");
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "Ocurrio un error, intenta de nuevo",
+      );
     }
   }
 
@@ -89,8 +106,8 @@ export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <h2 className="text-2xl font-bold">Listo! ✅</h2>
         <p className="mt-3 text-slate-600">
-          Recibimos tu cotizacion de {vertical.name.toLowerCase()}. Te vamos a contactar por
-          WhatsApp en las proximas horas.
+          Recibimos tu cotizacion de {vertical.name.toLowerCase()}. Te vamos a
+          contactar por WhatsApp en las proximas horas.
         </p>
       </div>
     );
@@ -125,12 +142,14 @@ export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
               onChange={(e) => setConsent(e.target.checked)}
               className="mt-1"
             />
-            Acepto que mis datos sean compartidos con las aseguradoras/corredores seleccionados
-            para recibir cotizaciones.
+            Acepto que mis datos sean compartidos con las
+            aseguradoras/corredores seleccionados para recibir cotizaciones.
           </label>
         ) : null}
 
-        {errorMessage ? <p className="text-sm text-red-600">{errorMessage}</p> : null}
+        {errorMessage ? (
+          <p className="text-sm text-red-600">{errorMessage}</p>
+        ) : null}
 
         <div className="flex items-center gap-3">
           {stepIndex > 0 ? (
@@ -148,7 +167,11 @@ export function QuoteFunnel({ vertical }: { vertical: VerticalConfig }) {
             disabled={status === "submitting"}
             className="flex-1 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
           >
-            {status === "submitting" ? "Enviando..." : isLastStep ? "Enviar" : "Siguiente"}
+            {status === "submitting"
+              ? "Enviando..."
+              : isLastStep
+                ? "Enviar"
+                : "Siguiente"}
           </button>
         </div>
       </div>
@@ -168,7 +191,9 @@ function FunnelFieldInput({
   if (field.type === "select") {
     return (
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">{field.label}</span>
+        <span className="mb-1 block text-sm font-medium text-slate-700">
+          {field.label}
+        </span>
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -190,7 +215,9 @@ function FunnelFieldInput({
   if (field.type === "radio") {
     return (
       <fieldset>
-        <legend className="mb-2 text-sm font-medium text-slate-700">{field.label}</legend>
+        <legend className="mb-2 text-sm font-medium text-slate-700">
+          {field.label}
+        </legend>
         <div className="space-y-2">
           {field.options?.map((opt) => (
             <label
@@ -214,7 +241,9 @@ function FunnelFieldInput({
 
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-700">{field.label}</span>
+      <span className="mb-1 block text-sm font-medium text-slate-700">
+        {field.label}
+      </span>
       <input
         type={field.type === "number" ? "number" : "text"}
         value={value}

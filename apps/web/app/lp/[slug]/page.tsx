@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Hero, WhatsAppButton } from "@seguro/ui";
+import { Hero } from "@seguro/ui";
 import { currentSite } from "@/lib/site";
 import { getLandingPage, landingPages } from "@/lib/landing-pages";
+import { LpView } from "./LpView";
+import { TrackedWhatsAppButton } from "./TrackedWhatsAppButton";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: true },
@@ -12,13 +14,18 @@ export function generateStaticParams() {
   return landingPages.map((lp) => ({ slug: lp.slug }));
 }
 
-export default async function LandingPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function LandingPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const lp = getLandingPage(slug);
   if (!lp) notFound();
 
   return (
     <main>
+      <LpView slug={slug} />
       <Hero
         headline={lp.headline}
         subheadline={lp.subheadline}
@@ -26,7 +33,7 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
         ctaHref={`/cotizar/${lp.verticalId}`}
       />
       <div className="flex justify-center pb-16">
-        <WhatsAppButton
+        <TrackedWhatsAppButton
           phoneE164={currentSite.whatsappNumber}
           message={`Hola! Quiero cotizar ${lp.verticalId.replace(/-/g, " ")}`}
         />

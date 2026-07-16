@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { Hero, TrustBar } from "@seguro/ui";
+import { Footer } from "@/components/Footer";
 import { getSiteVerticals } from "@/lib/site";
 
 export default function HomePage() {
@@ -23,17 +25,20 @@ export default function HomePage() {
         <h2 className="mb-6 text-2xl font-bold">Elegi tu seguro</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {verticals.map((vertical) => (
-            <a
+            <Link
               key={vertical.id}
               href={vertical.pillarPath}
               className="rounded-lg border border-slate-200 p-6 transition hover:border-blue-400 hover:shadow-sm"
             >
               <h3 className="text-lg font-semibold">{vertical.name}</h3>
-              <p className="mt-1 text-sm text-slate-600">Cotiza gratis en 2 minutos</p>
-            </a>
+              <p className="mt-1 text-sm text-slate-600">
+                Cotiza gratis en 2 minutos
+              </p>
+            </Link>
           ))}
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

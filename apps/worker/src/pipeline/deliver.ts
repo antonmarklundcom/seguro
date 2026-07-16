@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import { prisma, type Lead, type Partner, type PartnerVertical } from "@seguro/db";
+import { sendLeadEmail } from "../lib/email.js";
 
 interface PartnerChannel {
   type: "webhook" | "email" | "whatsapp" | "sheet";
@@ -42,14 +43,23 @@ async function sendWebhook(lead: Lead, channel: PartnerChannel): Promise<void> {
   }
 }
 
-// TODO(phase 2): wire real Resend/WhatsApp Cloud API integrations. These
-// stubs log intent so the pipeline is fully exercisable end to end before
-// partner credentials exist.
 async function sendEmail(lead: Lead, channel: PartnerChannel): Promise<void> {
   if (!channel.config.to) throw new Error("email channel missing 'to'");
-  console.log(`[stub email] lead ${lead.id} -> ${channel.config.to}`);
+  await sendLeadEmail({
+    to: channel.config.to,
+    leadId: lead.id,
+    verticalId: lead.verticalId,
+    name: lead.name,
+    phone: lead.phone,
+    email: lead.email,
+    city: lead.city,
+    payload: (lead.payload as Record<string, unknown>) ?? {},
+  });
 }
 
+// TODO(phase 2): wire real WhatsApp Cloud API / Sheets integrations. These
+// stubs log intent so the pipeline is fully exercisable end to end before
+// partner credentials exist.
 async function sendWhatsapp(lead: Lead, channel: PartnerChannel): Promise<void> {
   if (!channel.config.phone) throw new Error("whatsapp channel missing 'phone'");
   console.log(`[stub whatsapp] lead ${lead.id} -> ${channel.config.phone}`);

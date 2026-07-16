@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ConsentBanner, GtmScript } from "@seguro/tracking";
 import { currentSite } from "@/lib/site";
 import "./globals.css";
 
@@ -12,10 +13,22 @@ export const metadata: Metadata = {
   metadataBase: new URL(`https://${currentSite.domain}`),
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const gtmContainerId = process.env.NEXT_PUBLIC_GTM_CONTAINER_ID || undefined;
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="es-PY">
-      <body>{children}</body>
+      <head>
+        <GtmScript containerId={gtmContainerId} />
+      </head>
+      <body>
+        {children}
+        <ConsentBanner />
+      </body>
     </html>
   );
 }

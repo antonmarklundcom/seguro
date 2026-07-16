@@ -1,6 +1,6 @@
 import type { SiteConfig } from "../site";
 import type { VerticalConfig } from "../vertical";
-import { seguroDeAuto, seguroSite, seguroVerticals } from "./seguro";
+import { seguroDeAuto, seguroDeMoto, seguroMedico, seguroSite, seguroVerticals } from "./seguro";
 
 export const sites: SiteConfig[] = [seguroSite];
 
@@ -20,4 +20,4 @@ export function getVertical(siteId: string, verticalId: string): VerticalConfig 
   return getVerticalsForSite(siteId).find((v) => v.id === verticalId);
 }
 
-export { seguroDeAuto, seguroSite, seguroVerticals };
+export { seguroDeAuto, seguroDeMoto, seguroMedico, seguroSite, seguroVerticals };

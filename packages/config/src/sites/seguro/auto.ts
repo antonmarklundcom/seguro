@@ -1,16 +1,7 @@
-import type { SiteConfig } from "../site";
-import type { VerticalConfig } from "../vertical";
+import type { VerticalConfig } from "../../vertical";
+import { seguroSite } from "./site";
 
-export const seguroSite: SiteConfig = {
-  id: "seguro.com.py",
-  domain: "seguro.com.py",
-  brandName: "Seguro",
-  locale: "es-PY",
-  themeColor: "#0F62FE",
-  whatsappNumber: "+595981000000", // TODO: replace with real business number
-};
-
-const autoDescription =
+const description =
   "Compara cotizaciones de seguro de auto en Paraguay con las mejores " +
   "aseguradoras. Cotiza gratis en 2 minutos y recibi ofertas por WhatsApp.";
 
@@ -21,7 +12,7 @@ export const seguroDeAuto: VerticalConfig = {
   pillarPath: "/seguro-de-auto",
   seo: {
     title: "Seguro de Auto en Paraguay - Cotiza Gratis | Seguro",
-    description: autoDescription,
+    description,
   },
   active: true,
   fields: [
@@ -78,5 +69,3 @@ export const seguroDeAuto: VerticalConfig = {
     },
   ],
 };
-
-export const seguroVerticals: VerticalConfig[] = [seguroDeAuto];

@@ -16,22 +16,41 @@ export const landingPages: LandingPageConfig[] = [
     slug: "seguro-auto-cotiza",
     verticalId: "seguro-de-auto",
     headline: "Cotiza tu Seguro de Auto en 2 Minutos",
-    subheadline: "Compara precios de las mejores aseguradoras de Paraguay, gratis y sin compromiso.",
+    subheadline:
+      "Compara precios de las mejores aseguradoras de Paraguay, gratis y sin compromiso.",
     ctaLabel: "Cotizar gratis",
   },
   {
     slug: "seguro-auto-barato",
     verticalId: "seguro-de-auto",
     headline: "Seguro de Auto Desde Precios Accesibles",
-    subheadline: "Encontra la cobertura que se ajusta a tu presupuesto. Cotiza gratis ahora.",
+    subheadline:
+      "Encontra la cobertura que se ajusta a tu presupuesto. Cotiza gratis ahora.",
     ctaLabel: "Ver precios",
   },
   {
     slug: "seguro-auto-asuncion",
     verticalId: "seguro-de-auto",
     headline: "Seguro de Auto en Asuncion",
-    subheadline: "Aseguradoras y corredores de confianza en Asuncion. Cotiza gratis por WhatsApp.",
+    subheadline:
+      "Aseguradoras y corredores de confianza en Asuncion. Cotiza gratis por WhatsApp.",
     ctaLabel: "Cotizar ahora",
+  },
+  {
+    slug: "seguro-moto-ya",
+    verticalId: "seguro-de-moto",
+    headline: "Cotiza el Seguro de tu Moto Ahora",
+    subheadline:
+      "Protege tu moto en menos de 2 minutos. Compara precios gratis y sin compromiso.",
+    ctaLabel: "Cotizar gratis",
+  },
+  {
+    slug: "seguro-medico-familia",
+    verticalId: "seguro-medico",
+    headline: "Seguro Medico para vos y tu Familia",
+    subheadline:
+      "Compara planes de salud privados en Paraguay. Cotizacion gratuita en minutos.",
+    ctaLabel: "Ver planes",
   },
 ];
 
