@@ -8,6 +8,8 @@ const staticPages = [
   { path: "/guias", priority: 0.6 },
   { path: "/aseguradoras", priority: 0.6 },
   { path: "/socios", priority: 0.5 },
+  { path: "/seguro-de-auto/contra-terceros", priority: 0.7 },
+  { path: "/seguro-de-auto/todo-riesgo", priority: 0.7 },
   { path: "/sobre-nosotros", priority: 0.3 },
   { path: "/contacto", priority: 0.3 },
   { path: "/privacidad", priority: 0.1 },

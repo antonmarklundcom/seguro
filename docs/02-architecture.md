@@ -124,12 +124,16 @@ Multi-step form (2–4 steps) beats a long single form on mobile:
 
 ## Performance budget (CI-enforced)
 
-| Metric | Budget |
-|--------|--------|
-| LCP (mobile, 4G) | < 2.0 s |
-| CLS | < 0.05 |
-| JS shipped on LPs | < 90 kB gz |
-| Lighthouse SEO/Perf | ≥ 95 / ≥ 90 |
+Enforced via Lighthouse CI (`apps/web/lighthouserc.cjs`, run in
+`.github/workflows/ci.yml`) against a production build on every PR.
+
+| Metric | Budget | CI severity |
+|--------|--------|--------------|
+| LCP (mobile, 4G) | < 2.0 s | error (build fails) |
+| CLS | < 0.05 | error (build fails) |
+| Lighthouse SEO (indexable pages) | ≥ 95 | error (build fails) |
+| Lighthouse Performance | ≥ 90 | error (build fails) |
+| JS shipped per page | < 90 kB gz | **warn only for now** — current shared bundle is ~110 kB. Tighten to error once trimmed (candidates: code-split the funnel's radio/select inputs, audit Tailwind's generated CSS size). |
 
 Fast pages are a *ranking factor*, a *Quality Score factor* (cheaper clicks)
 and a *conversion factor* — this budget is a business rule, not vanity.

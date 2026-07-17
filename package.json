@@ -13,7 +13,8 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "db:generate": "pnpm --filter @seguro/db generate",
-    "db:migrate": "pnpm --filter @seguro/db migrate"
+    "db:migrate": "pnpm --filter @seguro/db migrate",
+    "db:seed": "pnpm --filter @seguro/db seed"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

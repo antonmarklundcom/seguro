@@ -35,6 +35,14 @@ export default function SeguroDeAutoPage() {
         "Cotizacion 100% gratuita",
       ]}
       faqItems={faqItems}
+      relatedLinks={[
+        { href: "/seguro-de-auto/contra-terceros", label: "Seguro contra terceros" },
+        { href: "/seguro-de-auto/todo-riesgo", label: "Seguro todo riesgo" },
+        {
+          href: "/guias/cuanto-cuesta-el-seguro-de-auto-en-paraguay",
+          label: "Cuanto cuesta el seguro de auto",
+        },
+      ]}
     />
   );
 }

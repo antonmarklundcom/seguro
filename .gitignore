@@ -145,5 +145,8 @@ vite.config.ts.timestamp-*
 # Turborepo
 .turbo/
 
+# Lighthouse CI reports
+.lighthouseci/
+
 # Prisma
 packages/db/generated/
