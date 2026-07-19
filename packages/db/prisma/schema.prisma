@@ -114,6 +114,12 @@ model Partner {
   name      String
   active    Boolean  @default(true)
   channels  Json // [{ type: "webhook" | "email" | "whatsapp" | "sheet", config: {...} }]
+
+  // SHA-256 hex of the partner's API key (docs/05 "Partner API"). The raw
+  // key is shown once at generation time in the admin and never stored -
+  // only the hash, so a DB leak doesn't expose usable credentials.
+  apiKeyHash String? @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

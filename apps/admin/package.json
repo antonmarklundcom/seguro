@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@seguro/db": "workspace:*",
+    "@seguro/shared": "workspace:*",
     "bullmq": "^5.34.0",
     "ioredis": "^5.4.2",
     "next": "^15.1.3",

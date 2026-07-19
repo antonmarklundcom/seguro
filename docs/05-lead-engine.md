@@ -124,9 +124,16 @@ volume won't justify it for a long time.
 - Monthly invoicing report per partner from `LeadDelivery` (billable rows,
   dedup/rejection credits). Manual invoices first; automate later.
 
-## Partner API (phase 2)
-`GET /v1/partner/leads`, `POST /v1/partner/leads/:id/outcome` with per-partner
-API keys — needed for the bigger insurers' CRMs.
+## Partner API
+
+**Built.** `GET /v1/partner/leads` (paginated, filterable by delivery status)
+and `POST /v1/partner/leads/:deliveryId/outcome` (`ACCEPTED`/`REJECTED`/`SOLD`),
+authenticated with a per-partner API key — needed for the bigger insurers'
+CRMs to integrate directly instead of relying on webhook/email/WhatsApp
+delivery. Keys are generated in the admin (`apps/admin`, partner detail page),
+shown once, and stored only as a SHA-256 hash (`packages/shared/src/api-key.ts`)
+so a database leak doesn't expose usable credentials. Reporting an outcome
+updates both `LeadDelivery.outcome` and mirrors it onto `Lead.status`.
 
 ## Admin (phase 1 = Retool on Postgres; phase 2 = `apps/admin`)
 Lead browser/search, partner CRUD + routing rules with dry-run simulator

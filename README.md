@@ -37,8 +37,12 @@ across all 10 packages.
 - 2 subtype pages (contra-terceros, todo-riesgo), 2 guía articles, an
   aseguradoras hub, legal/static pages, sitemap/robots
 - GTM/GA4 tracking scaffold with Consent Mode v2
-- Internal admin app (lead browser, partner CRUD, routing rules, manual redeliver)
-- 40 unit tests, CI (typecheck/lint/test/build), Dockerfiles, Vercel configs
+- Internal admin app (lead browser, partner CRUD, routing rules, manual redeliver,
+  partner API key generation)
+- Partner API (`GET /v1/partner/leads`, `POST .../outcome`) with hashed
+  per-partner API keys, for partners with their own CRM (docs/05)
+- 51 unit tests, CI (typecheck/lint/test/build + Lighthouse budget),
+  Dockerfiles, Vercel configs
 
 **Deliberately not built yet** (each needs something only a human can provide):
 - **Legal review** of the consent/privacy copy and the broker-licensing
@@ -59,8 +63,9 @@ across all 10 packages.
 - **Real branding** — generic Tailwind blue, no logo/visual identity yet
 - **E2E test suite** — verified manually with headless Chromium during
   development, not committed as an automated Playwright suite
-- Partner API, OCI/Enhanced Conversions push, A/B testing, renewal nurture
-  (all explicitly phase 2+ in docs/08)
+- OCI/Enhanced Conversions push, A/B testing, renewal nurture (all
+  explicitly phase 2+ in docs/08) — OCI specifically needs a real Google
+  Ads account to push conversions to
 
 ## Getting started
 

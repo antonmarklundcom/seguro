@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@seguro/db";
+import { generateApiKey, hashApiKey } from "@seguro/shared";
 import { getLeadProcessingQueue } from "./queue";
 
 /** Re-enqueues a lead for scoring/routing/delivery (docs/05 "delivery
@@ -61,4 +62,20 @@ export async function upsertPartnerVertical(formData: FormData): Promise<void> {
 export async function deactivatePartnerVertical(id: string, partnerId: string): Promise<void> {
   await prisma.partnerVertical.update({ where: { id }, data: { active: false } });
   revalidatePath(`/partners/${partnerId}`);
+}
+
+/**
+ * Issues a new Partner API key (docs/05 "Partner API"). Returns the raw
+ * key exactly once — only its hash is persisted, so this is the only
+ * chance to show it to whoever is setting up the partner's integration.
+ * Invalidates any previously issued key for this partner.
+ */
+export async function regeneratePartnerApiKey(partnerId: string): Promise<string> {
+  const rawKey = generateApiKey();
+  await prisma.partner.update({
+    where: { id: partnerId },
+    data: { apiKeyHash: hashApiKey(rawKey) },
+  });
+  revalidatePath(`/partners/${partnerId}`);
+  return rawKey;
 }

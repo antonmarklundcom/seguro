@@ -4,6 +4,7 @@ import Fastify from "fastify";
 import { env } from "./lib/env.js";
 import { healthRoutes } from "./routes/health.js";
 import { leadsRoutes } from "./routes/leads.js";
+import { partnerRoutes } from "./routes/partner.js";
 
 const app = Fastify({
   logger: {
@@ -17,6 +18,7 @@ await app.register(rateLimit, { max: 20, timeWindow: "1 minute" });
 
 await app.register(healthRoutes);
 await app.register(leadsRoutes);
+await app.register(partnerRoutes);
 
 app
   .listen({ port: env.PORT, host: "0.0.0.0" })

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@seguro/db";
 import { deactivatePartnerVertical, togglePartnerActive, upsertPartnerVertical } from "@/lib/actions";
 import { ChannelForm } from "./ChannelForm";
+import { ApiKeyPanel } from "./ApiKeyPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,11 @@ export default async function PartnerDetailPage({ params }: { params: Promise<{ 
       <div className="mb-8 rounded-lg border border-slate-200 bg-white p-5">
         <h2 className="mb-3 font-semibold text-slate-800">Canal de entrega</h2>
         <ChannelForm partnerId={partner.id} channels={partner.channels as never} />
+      </div>
+
+      <div className="mb-8 rounded-lg border border-slate-200 bg-white p-5">
+        <h2 className="mb-3 font-semibold text-slate-800">API key (integracion directa)</h2>
+        <ApiKeyPanel partnerId={partner.id} hasKey={Boolean(partner.apiKeyHash)} />
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-5">
