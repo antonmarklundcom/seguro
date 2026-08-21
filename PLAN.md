@@ -1,205 +1,158 @@
-# PLAN.md — seguro.com.py Build Plan
+# PLAN.md — seguro.com.py Fable Plan (v2)
 
 > **Authored by Fable 5** (planning/architecture model) for handoff to
-> **Sonnet 5 / Opus 4.8** implementation sessions.
-> Date: 2026-07-16 · Status: awaiting owner review · Supersedes nothing —
-> complements `docs/01–09`, which remain the business/architecture reference.
+> **Opus / Sonnet** implementation sessions.
+> Date: 2026-08-21 · Status: active · Supersedes PLAN.md v1 (2026-07-16).
+> `docs/01–09` remain the business/architecture *end-state* reference;
+> `docs/10` is the legal/compliance reference; **this file is the build order.**
 
 ---
 
-## Model tiering — who does what
+## 1. The three questions this plan answers
 
-| Model | Use for | Don't use for |
-|-------|---------|---------------|
-| **Fable 5** | Architecture decisions, spec/schema changes, gap analysis, phase-gate reviews, revising this plan | Routine implementation — don't burn Fable time on mechanical build work |
-| **Sonnet 5** | Default builder for every phase below: scaffolding, pages, components, forms, API routes, content drafting, config, CI | Decisions that change the data model or business scope |
-| **Opus 4.8** | The genuinely hard problems only: lead-pipeline reliability edge cases, server-side tracking (ssGTM/OCI) wiring, tricky Core Web Vitals debugging | Anything Sonnet can do |
+1. **One system or landing + VenderCRM?** → **Both, in one system.** One
+   Next.js app (site + funnels + a thin lead API) with **VenderCRM as the
+   CRM of record at launch**. No custom lead engine, no custom admin, no
+   partner routing until a partner is actually paying. The custom Node lead
+   engine from `docs/05` is **Phase 3**, built inside the same app when the
+   first signed partner triggers it. Plain HTML/PHP is rejected: the plan
+   needs 15–20 SEO pages, multi-step funnels, noindex LP variants, JSON-LD
+   and sitemaps — that's Next.js territory, and PHP would be thrown away in
+   Phase 3 anyway.
+2. **What is legal in Paraguay without a broker license?** → Operate as a
+   **marketing/lead-referral company, never an intermediary**: no advising,
+   no recommending a specific insurer, no quoting premiums as if binding, no
+   participating in the sale. Full framework, copy rules and lawyer
+   checklist: **`docs/10-legal-compliance-paraguay.md`**. Legal items marked
+   ⚖️ below are launch blockers.
+3. **What does the owner do around the code?** → Every phase lists
+   **off-repo owner work** (legal, accounts, partners). PRs never wait on
+   each other across tracks unless marked as a gate.
 
-Rule of thumb: if the task is "make X exist per this spec", it's Sonnet.
-If the task is "decide what X should be", it's Fable. Escalate mid-phase to
-Opus only when Sonnet has failed twice on the same problem.
+## 2. Locked architecture decisions (2026-08-21)
 
----
+These amend v1 decisions 1–2 and `docs/02` where they conflict.
 
-## Current state (verified against the repo, 2026-07-16)
+| # | Decision | Rationale |
+|---|----------|-----------|
+| A | **One Next.js 15 (App Router) + TypeScript app** — no monorepo, no Fastify, no Redis/BullMQ at launch | Same as v1; the docs/02 monorepo is the Phase 3+ end state |
+| B | **Hosting: Hostinger managed Node.js + MySQL (Drizzle)**, per the owner's proven `nextjs-deploy-hostinger` / `nodejs-mysql-hostinger-stack` playbooks — not Vercel/Neon/Prisma | The owner already runs propia.com.py and educacion.com.py on this stack; one hosting bill, one deploy muscle. Revisit Vercel only if Core Web Vitals on Hostinger can't hit the CI budget |
+| C | **VenderCRM is the CRM of record at launch.** Form → own Next.js route handler → `POST {CRM_URL}/api/v1/leads` with per-site API key (server-side only), idempotency key, honeypot, attribution via `vc-attribution.js` | Contacts, dedup, pipeline (Nuevo → Contactado → Cotizado → Ganado/Perdido), per-site lead counts and UTM attribution exist today for free — replaces v1's "founder-inbox + custom /admin" entirely |
+| D | **MySQL `leads` mirror table, persist-first.** The handler writes the full lead (attribution + versioned consent + payload) to local MySQL *before* posting to VenderCRM; a failed CRM post never loses a lead and never blocks the visitor | Zero-lead-loss rule from docs/02/05/06 survives the VenderCRM decision; the mirror is also the substrate the Phase 3 lead engine grows out of, and the consent audit trail the CRM doesn't hold |
+| E | **Founder-worked leads first.** Owner works the VenderCRM pipeline and forwards leads to brokers by WhatsApp manually while recruiting partners. Partner routing/delivery/billing (docs/05) waits for the **first signed partner** | Unchanged from v1 — partner side is the hard side (docs/06 #1); build the machine when there's someone to deliver to |
+| F | **es-PY voseo copy shipped AI-drafted**, ₲ prices, honest promises ("cotizaciones en 24 h", never fake instant comparison), and — new, from docs/10 — a **standing marketing-service disclosure** on every page footer and consent text | v1 decision 3 + legal posture |
+| G | **prestamo.com.py stays out of scope**; keep vertical config as typed TS modules so extraction stays mechanical | Unchanged (docs/09) |
 
-**This repository contains zero code.** It holds a README and nine planning
-docs (`docs/01–09`) covering business model, market, architecture, SEO, Ads,
-lead engine, risks, opportunities, and roadmap. The business thinking is
-complete and good; nothing executable exists yet:
+Data flow at launch:
 
-- ❌ No app scaffold, package.json, or framework code
-- ❌ No database schema, no lead ingestion, no funnel
-- ❌ No content (0 SEO pages, 0 guías)
-- ❌ No tracking, no CI, no deploy configuration
-- ❌ Off-repo blockers untouched: legal review, partner LOIs, WhatsApp
-  Business API, Google Ads account, domain DNS → hosting
+```
+visitor → Next.js pages/funnel → POST /api/leads (own server)
+            1. insert MySQL leads mirror  (persist-first, consent + attribution)
+            2. POST VenderCRM /api/v1/leads (idempotency key, X-Api-Key)
+            3. redirect thank-you (always — CRM failure only logs)
+   owner works pipeline in VenderCRM → forwards to brokers via WhatsApp
+```
 
-## Decisions locked with the owner (2026-07-16)
+## 3. Model tiering — who does what
 
-These amend `docs/02` and `docs/08` where they conflict; the docs describe
-the *end state*, this plan describes the *launch state*.
+| Model | Use for |
+|-------|---------|
+| **Fable 5** | Phase-gate reviews, schema/scope changes, revising this plan, anything that changes a locked decision |
+| **Opus** | The hard PRs: PR-4 (lead capture core), PR-10 (tracking), Phase 3 lead engine; and rescue when Sonnet fails twice on the same problem |
+| **Sonnet** | Everything else: scaffold, pages, components, content, config, CI |
 
-1. **Founder-inbox delivery first.** No partners are signed yet. V1 delivers
-   every lead to the owner's own WhatsApp/email; the owner forwards manually
-   while recruiting brokers. The full routing/delivery engine (`Partner`,
-   `PartnerVertical`, multi-channel delivery, caps, billing) is deferred to
-   Phase 3, triggered by the first signed partner. The `Lead` table is built
-   to the full spec from day 1 so nothing needs migrating.
-2. **Lean single Next.js app, not the monorepo.** One Next.js 15 (App
-   Router) + TypeScript app on Vercel with managed Postgres (Neon) via
-   Prisma. Lead ingestion via API routes (persist-first), delivery retries
-   via a `DeliveryAttempt` table drained by Vercel Cron — no Redis, no
-   BullMQ, no Fastify, no Turborepo. Split into the docs/02 monorepo only
-   when real volume or a partner-API requirement forces it. Keep module
-   boundaries clean (`src/lib/leads/`, `src/lib/config/`, `src/components/blocks/`)
-   so the future extraction is mechanical.
-3. **AI-drafted es-PY shipped directly.** No local reviewer for launch. All
-   copy in Paraguayan Spanish (voseo: "cotizá", "elegí"), prices in ₲.
-   *Accepted risk* (docs/03 §5, docs/06 #16 adjacent): dialect authenticity
-   is a trust/SEO factor — revisit getting a local reviewer once revenue
-   exists, and prefer factual/verifiable claims over colloquial flourish in
-   the meantime.
-4. **prestamo.com.py is out of scope.** Seguro is the platform origin;
-   lessons and eventually code transfer later (docs/09). Keep verticals/
-   config as data (decision 2's module boundaries) but build **zero**
-   multi-tenant machinery now.
+Rule: "make X exist per this spec" → Sonnet. "decide what X is" → Fable.
+Every implementation session must read this file, `docs/10`, and the
+relevant `docs/0x` before writing code. Skills to load per PR are listed in
+each PR row.
 
----
+## 4. PR roadmap
 
-## Phased milestones
+Each PR is one implementation session on a `claude/…` branch, reviewed and
+merged by the owner. **Gate** = merge criteria. Skills column = Claude
+skills the session must load.
 
-Each phase ≈ 1–3 implementation sessions (Sonnet 5 unless noted). A phase is
-done when its **gate** passes, reviewed by Fable 5 before the next begins.
+### Phase 0 — Foundation
 
-### Phase 0 — Spec & scaffold (1 session)
-- Next.js 15 + TypeScript + Tailwind scaffold; Prisma + Neon Postgres;
-  Vercel project wired to the repo; `.env.example`.
-- Prisma schema: `Lead` (full attribution + consent columns per docs/05),
-  `DeliveryAttempt`, `Vertical` config table *or* typed TS config module
-  (decide in-session; TS config preferred at this scale).
-- Zod schemas shared between funnel and API route (one source of truth).
-- Design tokens + block library v1: Hero, QuoteForm, TrustBar, FAQ,
-  PartnerLogos, Testimonials, CTA/WhatsApp button.
-- CI (GitHub Actions): typecheck, lint, minimal tests, Lighthouse budget
-  from docs/02 (LCP < 2.0s mobile, CLS < 0.05, LP JS < 90 kB gz).
-- **Gate:** deploys to Vercel; a placeholder page scores ≥ 95 SEO / ≥ 90
-  perf in Lighthouse CI; schema migrated.
+| PR | Scope | Model | Skills | Gate |
+|----|-------|-------|--------|------|
+| **PR-3 Scaffold + deploy** | Next.js 15 + TS + Tailwind; Drizzle + Hostinger MySQL; deploy to a Hostinger subdomain; `.env.example`; CI (typecheck, lint, Lighthouse budget: LCP < 2.0 s mobile, CLS < 0.05, LP JS < 90 kB gz, SEO ≥ 95); design tokens + block library v1 (Hero, QuoteForm, TrustBar, FAQ, Testimonials, WhatsApp CTA) | Sonnet | `nodejs-mysql-hostinger-stack`, `nextjs-deploy-hostinger`, `web-design-system` | Deployed placeholder page passes Lighthouse budget in CI; DB migration runs |
+| **PR-4 Lead capture core** | `leads` mirror table (full docs/05 Lead columns: contact, payload JSON, gclid/UTMs/LP/device, `consent_at` + `consent_text_version`, status); shared Zod schemas; `POST /api/leads`: validate → normalize `+595` E.164 → **insert mirror first** → VenderCRM post (idempotency `sha256(phone\|hour)`, honeypot, 10 s timeout, never block visitor) → thank-you page; `vc-attribution.js` on every page, cookie mapped server-side; failure log + email alert | **Opus** | `vendercrm-lead-capture`, `paraguay-business-apps` | Real phone submit → contact in VenderCRM (normalized), deal in pipeline, mirror row with attribution; double-submit creates no duplicate; kill CRM URL → lead still in mirror + visitor still sees thank-you |
 
-### Phase 1 — Auto vertical core (2–3 sessions)
-- Multi-step quote funnel `/cotizar/seguro-de-auto/` per docs/02: easy
-  question first, contact last, sessionStorage state, **partial-lead
-  capture** server-side once phone is entered.
-- Lead ingest `POST /api/v1/leads`: Zod validation, E.164 `+595`
-  normalization, honeypot + time-to-submit floor + Turnstile + IP rate
-  limit; **persist first**, then enqueue delivery row; 30-day
-  phone+vertical dedupe.
-- Founder-inbox delivery: email (Resend) + WhatsApp notification to owner
-  with a structured lead card; retries via `DeliveryAttempt` + Vercel Cron;
-  failure alerting (email is fine).
-- Consumer confirmation page ("Listo ✅ — te contactarán hoy") with honest
-  UX per docs/06 #16 (no fake instant-price promise).
-- Minimal admin: one auth-protected `/admin` route — lead list, detail,
-  status toggle, CSV export. (Replaces the docs' Retool suggestion — no
-  extra SaaS.)
-- **Gate:** a test lead submitted on a phone arrives in the owner's
-  WhatsApp/email within 1 minute, survives a simulated delivery failure
-  (retry works), and appears in `/admin`. Zero-lead-loss check: kill the
-  delivery path mid-submit, lead still persists.
+### Phase 1 — Funnel + legal shell
 
-### Phase 2 — Content, SEO & landing pages (2–3 sessions)
-- SEO pages (all es-PY, SSG): home, `/seguro-de-auto/` pillar,
-  `/seguro-de-auto/contra-terceros/`, `/seguro-de-auto/todo-riesgo/`,
-  `/seguro-de-moto/` pillar, 6–8 guías (MDX), `/socios/` (partner-pitch —
-  this is a *sales tool* for recruiting the first brokers),
-  `/sobre-nosotros/`, `/contacto/`, `/privacidad/`, `/terminos/`.
-- Technical SEO per docs/03: metadata templates, JSON-LD (Organization,
-  WebSite, FAQPage, BreadcrumbList), segmented sitemaps, canonicals,
-  robots.txt blocking `/lp/` + funnel steps ≥ 2, OG images.
-- LP system `/lp/[slug]`: config-object pages from the same blocks, no nav,
-  one CTA, `noindex,follow`, `utm_term` dynamic-text insertion with safe
-  fallback. Ship 4 message-matched LPs for the initial auto ad groups.
-- Launch with 15–20 strong pages, not stubs (docs/03 §5).
-- **Gate:** Lighthouse budget green on every page class; Search Console
-  verified, sitemaps submitted, LPs confirmed noindex; owner has reviewed
-  and published the copy.
+| PR | Scope | Model | Skills | Gate |
+|----|-------|-------|--------|------|
+| **PR-5 Auto quote funnel** | `/cotizar/seguro-de-auto/` multi-step (easy question first, contact last, sessionStorage); partial-lead capture to mirror once phone entered; spam hardening: Turnstile, time-to-submit floor, IP rate limit; funnel steps ≥ 2 `noindex` | Sonnet | `web-design-system`, `paraguay-local-site` | Mobile funnel completes < 60 s; abandoned-after-phone funnel yields a mirror row; bots blocked in test |
+| **PR-6 Legal & trust layer** ⚖️ | `/privacidad`, `/terminos` drafted from `docs/10` templates; consent checkbox (unticked) with versioned text naming data sharing with insurers/brokers; footer disclosure on every page: *"seguro.com.py es un servicio de marketing y referencia. No somos corredores ni agentes de seguros y no brindamos asesoramiento."*; data-subject request contact (ARCO rights); cookie/consent banner v1 | Sonnet | — (reads `docs/10`) | Owner + lawyer have reviewed the exact texts before merge — **this PR merges only after ⚖️L1 below** |
 
-### Phase 3 — Tracking & measurement (1–2 sessions, Opus 4.8 for ssGTM/OCI wiring if Sonnet stalls)
-- GA4 + Consent Mode v2 + consent banner (versioned consent text stored per
-  lead — already in schema from Phase 0).
-- Event chain: `lp_view → funnel_start → funnel_step_n → lead_submit →
-  lead_valid` (server-fired). Store `gclid`/UTMs/LP slug/device on every
-  lead (schema already has the columns).
-- Server-side GTM on `t.seguro.com.py` **only if** the owner accepts its
-  hosting cost now; otherwise client GTM + server-fired GA4 Measurement
-  Protocol events as the launch config, ssGTM as a fast-follow. Enhanced
-  Conversions for Leads + OCI staged values (docs/04) come once Ads has
-  ≥ 30 conv/month — not before.
-- Weekly reconciliation report: GA4 submits vs. DB rows (docs/06 #12).
-- **Gate:** a test lead shows the full event chain in GA4 DebugView and its
-  gclid/UTM columns populated in Postgres.
-- *Also in this phase (owner, off-repo):* Google Ads account, billing,
-  first campaigns per docs/04 — code side just has to have LPs + conversion
-  events ready.
+### Phase 2 — Content, SEO, Ads
 
-### Phase 4 — Launch & first revenue (1–2 sessions + owner-led work)
-- Owner (off-repo, **launch blockers**): local legal read on lead-gen vs.
-  broker licensing + consent text + privacy policy (docs/06 #6–7);
-  WhatsApp Business API (or start with plain WhatsApp Business app for
-  founder-inbox); DNS `seguro.com.py` → Vercel; Ads live at US$ 500–1,000/mo.
-- Code: fix what real traffic exposes; A/B harness on the top LP (simple
-  cookie bucketing + GA4 dimension — no middleware complexity until needed);
-  review-request follow-up message to converted leads.
-- **Gate (graduate):** 4 consecutive weeks of leads flowing with zero lead
-  loss in reconciliation, CVR ≥ 8 % LP→lead on the best LP, and ≥ 1 broker
-  actively receiving forwarded leads.
+| PR | Scope | Model | Skills | Gate |
+|----|-------|-------|--------|------|
+| **PR-7 SEO core pages** | Home, `/seguro-de-auto/` pillar + `/contra-terceros/` + `/todo-riesgo/`, `/socios/` (broker-recruiting pitch page), `/sobre-nosotros/`, `/contacto/`; metadata templates, JSON-LD (Organization, WebSite, FAQPage, BreadcrumbList), sitemap, robots.txt, OG images | Sonnet | `web-design-system`, `nextjs-national-lead-gen`, `higgsfield-web-imagery` | Lighthouse green per page class; copy follows docs/10 language rules (checked against the prohibited-phrases list) |
+| **PR-8 Guías + moto** | 6–8 MDX guías (auto-focused), `/seguro-de-moto/` pillar + funnel reusing PR-5 machinery via vertical config | Sonnet | same as PR-7 | 15–20 strong indexable pages total, zero stubs |
+| **PR-9 Ads LP system** | `/lp/[slug]` config-object pages from the block library: no nav, one CTA, `noindex,follow`, `utm_term` dynamic-text insertion with safe fallback; 4 message-matched LPs for the initial auto ad groups | Sonnet | `web-design-system` | LPs confirmed noindex; LP JS < 90 kB gz; each LP posts leads with its own source/UTM visible in VenderCRM Sitios |
+| **PR-10 Tracking** | GA4 + Consent Mode v2 wired to the PR-6 banner; event chain `lp_view → funnel_start → funnel_step_n → lead_submit`; server-fired `lead_valid` (GA4 Measurement Protocol); gclid/UTM verified into mirror; weekly reconciliation script (GA4 submits vs mirror rows vs VenderCRM count) emailed to owner | **Opus** | `claude-api` n/a — GA4 docs | Test lead shows full chain in DebugView with populated attribution columns; reconciliation report renders with matching counts |
 
-### Phase 5 — Partner engine (post-launch, triggered by first signed partner)
-- `Partner` + `PartnerVertical` tables, routing (priority/caps/filters),
-  real delivery channels (WhatsApp template / email / Google Sheets),
-  outcome capture via signed magic-link, monthly billing report — i.e. the
-  rest of docs/05. Add moto/médico funnels per the docs/08 gating rule.
-- This is where re-evaluating the lean-app decision belongs: if partner
-  webhooks + retries outgrow cron, split `api`/`worker` per docs/02.
+### Launch (after ⚖️L1–L3 + PR-10)
 
----
+| PR | Scope | Model | Gate |
+|----|-------|-------|------|
+| **PR-11 Launch hardening** | Fix what real traffic exposes; simple A/B harness on top LP (cookie bucket + GA4 dimension); review-request WhatsApp follow-up message template; error alerting pass | Sonnet | 4 consecutive weeks zero lead loss in reconciliation; CVR ≥ 8 % on best LP |
 
-## What's needed to finish (gap checklist)
+### Phase 3 — Partner engine (**triggered by first signed partner, not by date**)
 
-**Code (this repo, ~7–10 build sessions to launch):**
-- [ ] Phase 0 scaffold + schema + CI + design blocks
-- [ ] Phase 1 funnel + lead API + founder-inbox delivery + admin
-- [ ] Phase 2 15–20 SEO pages + 4 Ads LPs + technical SEO
-- [ ] Phase 3 GA4/consent/conversion tracking + reconciliation
-- [ ] Phase 4 launch hardening + A/B loop
+| PR | Scope | Model |
+|----|-------|-------|
+| **PR-12 Partner + routing** | `partners`, `partner_verticals` tables (CPL ₲, caps, filters, priority, exclusivity) per docs/05; routing worker as Node cron in the same app reading the mirror; delivery via WhatsApp `wa.me` card + email; `delivery_attempts` with retries | Opus |
+| **PR-13 Outcomes + billing** | Magic-link accept/reject/sold; monthly billing report per partner from delivery rows (₲ integer amounts, IVA-aware line items per `paraguay-business-apps` — actual invoices issued from the owner's facturación system, not this app) | Sonnet |
+| **PR-14 Partner portal + API** | Auth-protected partner lead list + outcomes; per-partner API keys | Sonnet |
 
-**Owner (off-repo, can run in parallel — items 1–2 block launch):**
-1. [ ] Local legal review: lead-gen vs. corredor licensing; consent text;
-       privacy policy (docs/06 #6–7)
-2. [ ] Domain DNS + Google Ads account + billing
-3. [ ] Broker outreach (the `/socios/` page from Phase 2 is the pitch
-       asset); founder-inbox mode means launch does **not** wait on this
-4. [ ] WhatsApp Business (app now; Cloud API when partner delivery needs it)
-5. [ ] Decide ad budget commitment (docs/04 suggests US$ 500–1,000/mo to
-       start) — SEO alone takes 6–12 months (docs/06 #10)
+Phase 3 is also the re-evaluation point for decision A/B (split worker out,
+consider docs/02 monorepo) — Fable review before PR-12 starts.
 
-**Reusable elsewhere (portfolio note):** the block library, funnel
-framework, lead schema, and tracking setup built here are the intended
-platform for `prestamo.com.py` (docs/09). No sibling repo has reusable
-specs yet — seguro is the origin; extract, don't duplicate, when prestamo
-starts.
+## 5. Off-repo owner work (parallel tracks)
 
----
+### ⚖️ Legal track (details + checklists in `docs/10`)
 
-## Standing rules for implementation sessions
+| # | Item | Blocks |
+|---|------|--------|
+| **L1** | Local lawyer engagement (Asunción, insurance + data-protection practice): confirm the marketing-partner model against Ley de Seguros 827/96 licensing; review consent text, privacy policy, footer disclosure, and the prohibited-phrases list | PR-6 merge, launch |
+| **L2** | Entity + tax: incorporate an **EAS** via eas.mic.gov.py (100% foreign-ownable; legal representative needs a Paraguayan cédula — nominee/POA if non-resident), RUC, **SIFEN e-invoicing from day one** (e-Kuatía'i or certified provider) for lead fees + IVA 10% | first invoice (Phase 3), but start now — takes weeks |
+| **L3** | Data-protection compliance setup per Paraguay's data-protection law: consent + purpose registry, data-transfer terms with lead buyers (DPA), retention policy, ARCO request procedure | launch |
+| **L4** | Contract templates: lead purchase agreement with brokers (per-lead CPL pricing — see docs/10 on why premium revenue-share is the risky structure), duplicate/invalid crediting policy | first signed partner (Phase 3 trigger) |
 
-- Ship behind the Lighthouse budget — it's CI-enforced, not aspirational.
-- Never lose a lead: persist-first, retries, and the reconciliation count
-  must match. Any change touching the lead path gets a zero-loss test.
-- All user-facing copy: es-PY voseo, prices in ₲, honest promises
-  ("cotizaciones en 24 h", never fake instant comparison).
+### Tech/accounts track
+
+| # | Item | Blocks |
+|---|------|--------|
+| T1 | VenderCRM: create site under **Sitios**, get API key, set default pipeline stage; pipeline stages Nuevo → Contactado → Cotizado → Negociando → Ganado/Perdido | PR-4 verification |
+| T2 | Hostinger: pick account/slot, MySQL database, subdomain for staging | PR-3 |
+| T3 | DNS `seguro.com.py` → Hostinger | launch |
+| T4 | Google Ads account + billing; budget commitment US$ 500–1,000/mo (SEO alone takes 6–12 months, docs/06 #10) | first campaign after PR-9/PR-10 |
+| T5 | WhatsApp Business app on the founder number now; Cloud API only when Phase 3 delivery needs templates | — |
+| T6 | Search Console verification + sitemap submission | after PR-7 |
+
+### Partner track
+
+| # | Item |
+|---|------|
+| P1 | Broker outreach list (Asunción/CDE/Encarnación independents) — `/socios/` page from PR-7 is the pitch asset; founder-inbox mode means launch does **not** wait on this |
+| P2 | First signed partner (L4 contract) → triggers Phase 3 |
+
+## 6. Standing rules for implementation sessions
+
+- Read `PLAN.md` + `docs/10` before coding; load the skills listed on the PR.
+- Lighthouse budget is CI-enforced, not aspirational.
+- **Never lose a lead**: mirror insert precedes the CRM post; any change to
+  the lead path ships with a zero-loss test (kill the CRM, lead survives).
+- VenderCRM API key server-side only; never send pipeline/stage/owner from
+  code (routing lives in the CRM's Sitios config).
+- All user-facing copy: es-PY voseo, ₲ prices, `dd/mm/yyyy`,
+  `America/Asuncion`, honest promises; **never** use advice/recommendation
+  language — check every page against the docs/10 prohibited-phrases list.
 - `/lp/*` and funnel steps ≥ 2 stay `noindex` from the first deploy.
-- Keep verticals/config as data or typed config modules — no hardcoding
-  that blocks the prestamo future.
-- Business-scope changes (pricing model, verticals, partner terms) go back
-  to Fable 5 + owner; don't decide them mid-build.
+- Verticals as typed TS config modules — nothing hardcoded that blocks
+  moto/médico or the prestamo future.
+- Business-scope or legal-posture changes go back to Fable 5 + owner.
