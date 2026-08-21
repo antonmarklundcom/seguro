@@ -119,7 +119,7 @@ consider docs/02 monorepo) — Fable review before PR-12 starts.
 | # | Item | Blocks |
 |---|------|--------|
 | **L1** | Local lawyer engagement (Asunción, insurance + data-protection practice): confirm the marketing-partner model against Ley de Seguros 827/96 licensing; review consent text, privacy policy, footer disclosure, and the prohibited-phrases list | PR-6 merge, launch |
-| **L2** | Entity + tax: incorporate (EAS is the default candidate), RUC, timbrado/facturación for invoicing lead fees to brokers with IVA | first invoice (Phase 3), but start now — takes weeks |
+| **L2** | Entity + tax: incorporate an **EAS** via eas.mic.gov.py (100% foreign-ownable; legal representative needs a Paraguayan cédula — nominee/POA if non-resident), RUC, **SIFEN e-invoicing from day one** (e-Kuatía'i or certified provider) for lead fees + IVA 10% | first invoice (Phase 3), but start now — takes weeks |
 | **L3** | Data-protection compliance setup per Paraguay's data-protection law: consent + purpose registry, data-transfer terms with lead buyers (DPA), retention policy, ARCO request procedure | launch |
 | **L4** | Contract templates: lead purchase agreement with brokers (per-lead CPL pricing — see docs/10 on why premium revenue-share is the risky structure), duplicate/invalid crediting policy | first signed partner (Phase 3 trigger) |
 

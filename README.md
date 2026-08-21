@@ -22,6 +22,7 @@ partner → paid per lead (CPL) or per closed policy.
 | [07 — Opportunities](docs/07-opportunities.md) | Growth levers beyond the base plan |
 | [08 — Roadmap](docs/08-roadmap.md) | Phased delivery plan with milestones |
 | [09 — Multi-Vertical Platform](docs/09-multi-vertical-prestamo.md) | Reusing the platform for prestamo.com.py and other verticals |
+| [10 — Legal & Compliance (Paraguay)](docs/10-legal-compliance-paraguay.md) | Operating unlicensed as a marketing partner: Ley 827/96 line, Ley 7593/2025 data protection, consumer/anti-spam rules, EAS/tax, contract checklist |
 
 ## TL;DR of the plan
 

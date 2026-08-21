@@ -14,6 +14,10 @@ Revenue models, in order of implementation:
    Simplest to start with; requires lead-quality trust.
 2. **Revenue share / CPA** — partner pays per issued policy. Higher value,
    requires conversion feedback from the partner (API or monthly report).
+   ⚠️ **Legal caution (docs/10 §2):** premium- or commission-percentage
+   remuneration to an unlicensed party risks recharacterization as
+   intermediación (Ley 827/96 ≈Art. 82) and is likely unenforceable.
+   Only fixed-amount pricing unless local counsel approves otherwise.
 3. **Exclusive vs. shared leads** — exclusive leads (one partner) command
    3–5× the price of shared leads (sent to up to 3 partners).
 4. **Featured placement / sponsorship** — later, once organic traffic exists.
