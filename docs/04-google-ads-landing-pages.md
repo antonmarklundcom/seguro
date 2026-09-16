@@ -4,13 +4,17 @@ Paid is the volume engine while SEO matures. The two assets that decide unit
 economics are **message-matched landing pages** (conversion rate, Quality
 Score) and **closed-loop conversion tracking** (bidding on lead *quality*).
 
+> **Stack note (2026-09-16):** `/lp/*` pages are static HTML + PHP pages
+> from the `php-site-template`, not React components — see `docs/02`.
+
 ## Landing page system (`/lp/*`)
 
-- Built from the same block library as SEO pages, but: no header nav, one
-  CTA, `noindex,follow`.
-- A LP is a config object: `{ vertical, headline, subheadline, offer,
-  audience, city?, form-variant, trust-blocks[] }`. Creating a variant is a
-  10-line file, so *every ad group gets a message-matched LP*:
+- Built from the template's shared partials, same as SEO pages, but: no
+  header nav, one CTA, `noindex,follow`.
+- A LP is a `content/page.php` (or dedicated `lp`) record: `{ vertical,
+  headline, subheadline, offer, audience, city?, form-variant,
+  trust-blocks[] }`. Creating a variant is a small content record, so
+  *every ad group gets a message-matched LP*:
 
 ```
 /lp/seguro-auto-cotiza/          ← generic "cotizá en 2 minutos"
@@ -20,11 +24,14 @@ Score) and **closed-loop conversion tracking** (bidding on lead *quality*).
 /lp/seguro-medico-familia/       ← audience match
 ```
 
-- **Dynamic text insertion:** LP reads `utm_term`/ValueTrack params to echo
-  the keyword in the headline where sensible (with a safe fallback).
-- **A/B testing:** start with Vercel Edge Middleware bucketing + GA4
-  experiment dimension. One test at a time, conversion (lead submit) as the
-  only metric that decides.
+- **Dynamic text insertion:** a small vanilla-JS snippet
+  (`assets/js/lp-dynamic-text.js`) reads `utm_term`/ValueTrack params to
+  echo the keyword in the headline where sensible, with a safe fallback to
+  the default headline if no param is present or matched.
+- **A/B testing:** start with a **PHP-set cookie bucket** on first visit
+  (server-side, no edge runtime needed) + a GA4 experiment custom
+  dimension. One test at a time, conversion (lead submit) as the only
+  metric that decides.
 - **Mobile-first:** click-to-WhatsApp and click-to-call buttons alongside the
   form — in Paraguay a WhatsApp conversation *is* a lead (tracked as such).
 
@@ -55,24 +62,30 @@ Asunción/Central geo-tiered bids, Spanish **and** Guaraní language targeting
 The Swedish players win on feedback loops: they bid on what *closes*, not
 what *clicks*. Plan:
 
-1. **Consent Mode v2 + GTM (server-side container)** on a first-party
-   subdomain (`t.seguro.com.py`) — resilient to ad blockers/ITP, and keeps
-   PII handling under our control.
+1. **GA4 (client-side) + the CRM-provided `vc-attribution.js`** for
+   first-touch UTM/gclid/fbclid capture into the `vc_attr` cookie. No
+   server-side GTM container at launch — that assumed a Node/container
+   runtime this stack doesn't have (see `PLAN.md` §7); revisit only if
+   ad-blocker loss becomes measurably significant.
 2. **GA4 events:** `lp_view → funnel_start → funnel_step_n → lead_submit →
-   lead_valid` (server-fired after validation) → import to Google Ads.
+   lead_valid` (fired once the mirror write + CRM POST both complete) →
+   import to Google Ads.
 3. **Enhanced Conversions for Leads:** hash email/phone at submit, send with
    `gclid`.
-4. **Offline Conversion Import (OCI):** worker pushes lead-lifecycle upgrades
-   back to Google Ads by `gclid`:
-   - `lead_valid` (passed validation/dedup) — small value
+4. **Offline Conversion Import (OCI):** a small scheduled script (cron or
+   manual, reading `storage/leads/leads.ndjson` + VenderCRM outcome
+   exports — see docs/05) pushes lead-lifecycle upgrades back to Google Ads
+   by `gclid`:
+   - `lead_valid` (passed validation, reached VenderCRM) — small value
    - `lead_accepted` (partner accepted) — medium value
    - `policy_sold` (partner reported sale) — full value
-   Then bid **tCPA → tROAS on stage values**. This is the single biggest
-   lever in the whole plan: it makes Google optimize for revenue-quality
-   leads while competitors optimize for form-fills.
+   Then bid **tCPA → tROAS on stage values** once this exists. This is the
+   single biggest lever in the whole plan: it makes Google optimize for
+   revenue-quality leads while competitors optimize for form-fills. Not a
+   launch blocker — build it once there's enough volume to matter.
 5. **Every lead stores its full attribution:** `gclid`, UTMs, LP slug, A/B
-   variant, referrer, device — attribution is a first-class column set in
-   the DB, not a GA-only concern (doc 05).
+   bucket, referrer, device — attribution is a first-class field set in the
+   `leads.ndjson` mirror, not a GA-only concern (doc 05).
 
 ## Budget ramp (suggestion)
 

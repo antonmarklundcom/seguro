@@ -2,6 +2,12 @@
 
 Honest list, ordered by how likely they are to actually hurt.
 
+> **Stack note (2026-09-16):** items #12–15 below were written for the
+> Next.js/Postgres/BullMQ design and are restated for the static HTML + PHP
+> stack (`PLAN.md` v3). The risks themselves — lead loss, tracking
+> fragility, spam, vendor sprawl — are unchanged; only the technical detail
+> is updated.
+
 ## Business / market
 
 1. **Partner side is the hard side, not traffic.** Generating leads is a
@@ -13,19 +19,20 @@ Honest list, ordered by how likely they are to actually hurt.
 
 2. **Slow partner follow-up kills the flywheel.** A lead called after 3 days
    doesn't convert → partner says "your leads are bad" → churn.
-   **Mitigation:** measure time-to-contact (outcome feedback), route away
-   from slow partners automatically, send the consumer the partner's contact
-   too (double-sided connection).
+   **Mitigation:** measure time-to-contact (outcome feedback, tracked
+   manually or via VenderCRM), route away from slow partners, send the
+   consumer the partner's contact too (double-sided connection).
 
 3. **Small absolute market.** PY insurance search volume is limited; the
    ceiling for a single vertical is real. **Mitigation:** multi-vertical
-   platform from day 1 (docs 02/09) — the same machine runs préstamos,
-   telecom, etc. Portfolio economics, not single-site economics.
+   platform from day 1 (docs 02/09) — the same template pattern runs
+   préstamos, telecom, etc. as separate site clones. Portfolio economics,
+   not single-site economics.
 
 4. **Lead quality disputes.** Partners contest leads to lower bills.
-   **Mitigation:** full audit trail per lead (doc 05), clear crediting
-   policy (duplicates/invalid phones auto-credited), phone OTP validation
-   raises baseline quality.
+   **Mitigation:** full lead record per lead in `leads.ndjson` (doc 05,
+   contact + attribution + payload), clear crediting policy
+   (duplicates/invalid phones auto-credited).
 
 5. **Cash-flow / currency.** Ad spend in USD, revenue in PYG with net-30+
    from local partners. **Mitigation:** prepaid lead packages for new
@@ -43,10 +50,9 @@ Honest list, ordered by how likely they are to actually hurt.
 
 7. **Data protection.** Selling personal data without proper consent is the
    existential legal risk for a lead business. Paraguay's framework is
-   tightening (Ley 6534/2020 today; a general data-protection law has been
-   advancing in Congress). **Mitigation:** explicit versioned consent, DPAs
-   with partners, GDPR-grade practices from day 1 (doc 05) — cheaper than
-   retrofitting.
+   tightening (Ley 6534/2020 today; Ley 7593/2025 advancing toward full
+   force). **Mitigation:** explicit versioned consent, DPAs with partners,
+   GDPR-grade practices from day 1 (doc 05) — cheaper than retrofitting.
 
 8. **Bidding on competitor/insurer brand names** in Google Ads can trigger
    complaints. Legal-check locally; start without brand campaigns.
@@ -67,22 +73,35 @@ Honest list, ordered by how likely they are to actually hurt.
 
 ## Technical
 
-12. **Lead loss = direct revenue loss.** Serverless cold starts, failed
-    webhooks, dropped queue jobs. **Mitigation:** persist-first ingest,
-    retries + DLQ, Sentry alerting, weekly lead-count reconciliation
-    (form submits in GA4 vs. rows in Postgres — the numbers must match).
+12. **Lead loss = direct revenue loss.** A failed `enviar.php` request, a
+    hosting outage mid-write, or a VenderCRM POST that silently fails could
+    each cost a lead. **Mitigation:** persist-first append to
+    `storage/leads/leads.ndjson` *before* the VenderCRM call (docs/02/05),
+    so the append is the durability boundary rather than an external
+    service's success response; weekly reconciliation of `leads.ndjson` row
+    counts vs. VenderCRM's Sitios lead count vs. GA4 `lead_submit` events —
+    the numbers must match (doc 05).
 
-13. **Tracking fragility.** Ad blockers, iOS ITP, Consent Mode misconfig →
-    Google bids blind. **Mitigation:** server-side GTM on first-party
-    subdomain + server-fired conversion events (doc 04).
+13. **Tracking fragility.** Ad blockers, iOS ITP, or a mis-set
+    `vc-attribution.js` snippet → attribution gaps and Google bids blind.
+    **Mitigation:** the CRM-provided attribution cookie is first-party on
+    the CRM's own domain (mitigates some blocking); treat any large gap
+    between GA4 and `leads.ndjson` counts as a tracking-fragility signal to
+    investigate, not a lead-loss signal (doc 05's reconciliation section
+    explains the difference).
 
 14. **Form spam / click fraud.** Competitors and bots can poison lead quality
-    and waste budget. **Mitigation:** Turnstile, honeypots, submit-time
-    floors, IP/ASN heuristics; monitor invalid-lead rate per source.
+    and waste budget. **Mitigation:** honeypot field + time-to-submit floor
+    on every form (already in the template's `enviar.php` pattern); add
+    Cloudflare Turnstile only if spam volume actually shows up in
+    `leads.ndjson`; monitor invalid-lead rate per source.
 
 15. **Single-founder bus factor / vendor sprawl.** Keep the stack boring and
-    documented (this repo *is* the documentation); prefer managed services
-    with export paths (Postgres dumps, GTM containers exportable).
+    documented (this repo *is* the documentation). The static HTML + PHP
+    stack is deliberately narrower than a Node/Postgres/queue stack would
+    be: fewer services to patch, a plain git repo + a flat log file to back
+    up, and a hosting account (Hostinger shared hosting) that needs no
+    database administration at all.
 
 ## Product
 

@@ -6,6 +6,10 @@
 > counsel must confirm them (owner task ⚖️L1 in PLAN.md).
 > Implementation sessions: §3 (the line) and §10 (PR mapping) are the parts
 > that constrain code and copy.
+> **Stack note (2026-09-16):** §10's mapping table below has been updated
+> to the `PLAN.md` v3 PR names (T0–T5, static HTML + PHP). Nothing else in
+> this file changed — the legal/compliance analysis is entirely
+> stack-independent.
 
 ## 1. The operating model in one paragraph
 
@@ -123,10 +127,10 @@ our site as advertising front-end → lawyer question Q3.
 | Obligation | Implementation |
 |---|---|
 | Legal basis for **selling/transferring leads**: use **explicit consent**, not legitimate interest (balancing test + objection right make LI fragile for data sales) | Unticked checkbox, versioned text naming the transfer: *"Acepto que mis datos sean transferidos a corredores de seguros y aseguradoras habilitados para que me contacten con cotizaciones."* Category of recipients named; partner list linked when partners exist |
-| Consent: prior, free, informed, unequivocal, **revocable as easily as given**; **burden of proof on us** | `leads` mirror stores `consent_at`, `consent_text_version`, IP; revocation channel on /privacidad handled like an ARCO request |
+| Consent: prior, free, informed, unequivocal, **revocable as easily as given**; **burden of proof on us** | `leads.ndjson` mirror stores `consent_at`, `consent_text_version`, IP; revocation channel on /privacidad handled like an ARCO request |
 | Purpose limitation | Leads used only for insurance-quote contact; no onward resale beyond the consented categories; no repurposing for other verticals without new consent |
-| Security (≈Art. 16) + **72 h breach notification** (≈Art. 17) | HTTPS-only, key server-side, PII never in logs, DB access restricted; breach runbook in the owner's ops notes |
-| Data-subject rights (access, rectification, erasure, opposition, revocation) — "ARCO" | Contact + procedure published on /privacidad; requests answered from the mirror table |
+| Security (≈Art. 16) + **72 h breach notification** (≈Art. 17) | HTTPS-only, key server-side, PII never in logs, `leads.ndjson` kept outside the web root with restricted file permissions; breach runbook in the owner's ops notes |
+| Data-subject rights (access, rectification, erasure, opposition, revocation) — "ARCO" | Contact + procedure published on /privacidad; requests answered by locating and editing/removing the matching `leads.ndjson` line(s) |
 | Correction duty: notify recipients within **5 business days** when transferred data proves wrong | Clause in the lead purchase agreement (§6) + manual process |
 | Sensitive data (health) = stricter tier, fines up to 5,000 jornales (10,000 for minors; general 20–2,500) | Never collect health data; forms 18+ |
 | Enforcement: **Agencia Nacional de Protección de Datos Personales** (within MITIC) | Watch for registration/DPO duties in the pending reglamento |
@@ -211,12 +215,12 @@ Altra Legal.
 
 | Requirement | Where it lands |
 |---|---|
-| Footer disclosure + no-advice language | Every page/layout — PR-6, checked in every content PR (PR-7/8/9) against §3 prohibited list |
-| Versioned explicit consent naming transfer | Form component + `consent_text_version` in leads mirror — PR-4/PR-6 |
-| Consent proof (timestamp, IP, text version) | `leads` mirror columns — PR-4 |
-| Provider identification (Ley 4868) | Footer + /terminos — PR-6 |
-| ARCO/revocation procedure | /privacidad — PR-6 |
-| No health/credit fields | Funnel schemas — PR-5/PR-8 |
-| No superiority claims / partner-approved prices only | Content rule — PR-7/8/9; A/B copy variants too (PR-11) |
-| Partner data clauses | Contract template ⚖️L4, mirrored in Phase 3 delivery design (PR-12/13) |
-| Fixed per-lead billing in ₲ + IVA via SIFEN | PR-13 billing report feeds the owner's e-invoicing — never % of premium |
+| Footer disclosure + no-advice language | `partials/footer.php`, every page — T1 (`PLAN.md`), checked in every content PR (T2a/b/c) against §3 prohibited list |
+| Versioned explicit consent naming transfer | Form markup + `consent_text_version` field in `leads.ndjson` — T2d/T3 |
+| Consent proof (timestamp, IP, text version) | `leads.ndjson` mirror fields — T3 |
+| Provider identification (Ley 4868) | Footer + /terminos — T2d |
+| ARCO/revocation procedure | /privacidad — T2d |
+| No health/credit fields | Funnel content records — T2a/T2b |
+| No superiority claims / partner-approved prices only | Content rule — T1/T2a/T2b/T2c; A/B copy variants too (T5) |
+| Partner data clauses | Contract template ⚖️L4, referenced in any future partner-engine design (see `PLAN.md` §7 — out of scope for this repo) |
+| Fixed per-lead billing in ₲ + IVA via SIFEN | Owner's manual invoicing from VenderCRM/`leads.ndjson` records — never % of premium |
