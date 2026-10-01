@@ -19,15 +19,20 @@ at the end.
 2. **The latest plan** is in GitHub repo `antonmarklundcom/seguro`, branch
    `main`. Clone it read-only into a scratch folder:
    `git clone https://github.com/antonmarklundcom/seguro <scratch>/seguro-plan`
-   Read these first: `PLAN.md`, `docs/BUSINESS.md`, `docs/LEGAL-AUDIT.md`,
-   `docs/LAWYER-CHECKLIST.md`, `docs/05-lead-engine.md`, `docs/09-multi-vertical-prestamo.md`,
-   and `docs/10-legal-compliance-paraguay.md`. Also list the open and merged PRs of that repo
+   Read these first: `README.md`, `docs/MASTER_PLAN.md`, `docs/DISCLAIMERS.md`,
+   `docs/LEGAL-AUDIT.md`, `docs/ARCHITECTURE.md`, `docs/PARTNER-FORM.md`,
+   `docs/BUSINESS.md`, `docs/LAWYER-CHECKLIST.md`. (Since 2026-10-01 the plan is an
+   information site with no consumer data; the lead-gen docs are `*-LEADGEN-OLD.md`
+   and are not the target.) Also list the open and merged PRs of that repo
    and read their descriptions.
 3. **The live sites**: fetch `https://seguro.com.py/sitemap.xml` and
    `https://prestamo.com.py/sitemap.xml`, then every URL in them.
 
 ## Tasks
 
+0. **Plan vs live, in one sentence:** the target is an information site (no
+   forms except `/contacto` for partners, no WhatsApp link, no prices, no ads).
+   Flag every live feature that contradicts that.
 1. **Run the copy audit on seguro.com.py:**
    `node <scratch>/seguro-plan/tools/legal-audit.mjs https://seguro.com.py/sitemap.xml > <scratch>/seguro-audit.md`
    Then read every row marked high or medium, and every calculator and price

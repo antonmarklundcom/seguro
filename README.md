@@ -1,4 +1,18 @@
-# seguro.com.py — Insurance Lead Generation Platform for Paraguay
+# seguro.com.py — Insurance information site for Paraguay
+
+> **Active plan (2026-10-01): information site, no consumer data, no sales, no
+> leads, no ads.** Start with [`docs/MASTER_PLAN.md`](docs/MASTER_PLAN.md). Docs:
+> [LEGAL-AUDIT](docs/LEGAL-AUDIT.md) · [BUSINESS](docs/BUSINESS.md) ·
+> [ARCHITECTURE](docs/ARCHITECTURE.md) · [DISCLAIMERS](docs/DISCLAIMERS.md) ·
+> [PARTNER-FORM](docs/PARTNER-FORM.md) · [LAWYER-CHECKLIST](docs/LAWYER-CHECKLIST.md).
+> Scan script: `node tools/legal-audit.mjs <sitemap-url>`.
+> **Superseded (kept for a possible later lead-gen phase):** everything below
+> this banner, `docs/*-LEADGEN-OLD.md` and `docs/MASTER_PLAN-LEADGEN-OLD.md`.
+> Nothing is deployed from this repo's planning phase.
+
+---
+
+## (Superseded) Insurance Lead Generation Platform for Paraguay
 
 Comparison & lead-generation site for insurance in Paraguay (Spanish, es-PY).
 Model inspired by Swedish comparison sites (Insplanet, Compricer, Zmarta):
@@ -14,7 +28,7 @@ partner → paid per lead (CPL) or per closed policy.
 | Doc | Contents |
 |-----|----------|
 | [01 — Vision & Market](docs/01-vision-and-market.md) | Business model, Paraguay market, verticals, partners |
-| [02 — Architecture](docs/02-architecture.md) | Tech stack, system design, repo layout, infra |
+| [02 — Architecture (old, now `ARCHITECTURE-LEADGEN-OLD.md`)](docs/ARCHITECTURE-LEADGEN-OLD.md) | Tech stack, system design, repo layout, infra |
 | [03 — Site Structure & SEO](docs/03-site-structure-seo.md) | URL architecture, content plan, technical SEO |
 | [04 — Google Ads & Landing Pages](docs/04-google-ads-landing-pages.md) | Campaign structure, LP system, tracking, conversion feedback |
 | [05 — Lead Engine](docs/05-lead-engine.md) | Data model, validation, scoring, routing, partner delivery |

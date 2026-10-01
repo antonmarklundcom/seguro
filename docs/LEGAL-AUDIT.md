@@ -1,184 +1,171 @@
-# LEGAL-AUDIT — seguro.com.py
+# LEGAL-AUDIT — seguro.com.py (information-site model)
 
-> Phase 1, 2026-09-30. This is research, **not legal advice**; every rule
-> goes to the lawyer (`docs/LAWYER-CHECKLIST.md`). Status labels:
-> **CONFIRMED (snippet)**: a search result quoted the official text, but
-> nobody has read the PDF itself. **CONFIRMED (secondary)**: seen in a
-> law-firm, press or authority summary. **UNVERIFIED — ask the lawyer**.
-> No citation was written from memory. Where no source was seen, the item
-> is marked unverified.
+Prepared 2026-10-01. **Research, not legal advice.** The site is an
+information site: no consumer data, no sales, no leads, no ads (see
+`MASTER_PLAN.md` §1). The earlier lead-gen audit is saved as
+`LEGAL-AUDIT-LEADGEN-OLD.md`; several of its rules still apply and are
+re-stated here, adapted.
 
-## 0. Limits of this audit (read first)
+Confidence: **H** several independent sources agree, or the official text was
+quoted in a result · **M** one law-firm or press source · **L** thin or
+conflicting · **UNVERIFIED** not seen: ask the lawyer.
 
-- **The live site could not be fetched.** This cloud session's network
-  policy blocks `seguro.com.py`, and also `bcp.gov.py`, `bacn.gov.py`,
-  `support.google.com` and `web.archive.org`. Web search returns no
-  indexed pages for `site:seguro.com.py`. So **§1 has no live findings yet**.
-- To close that gap, `tools/legal-audit.mjs` (read-only, no dependencies,
-  Node 18+) fetches the sitemap and all 55 URLs. It extracts the title, meta
-  description, headings, paragraphs, list items, table cells, buttons,
-  links and JSON-LD, and applies the rules in §3. Output: one table
-  (URL, element, exact text, rule, risk, safe rewrite) plus a
-  per-page disclosure matrix. It was tested against a local fixture.
-  Run it from any machine that can reach the site:
-  `node tools/legal-audit.mjs > docs/LEGAL-AUDIT-live.md`
-  The output is a first pass: a person still reads every page, especially
-  calculators and tables, where the regexes see numbers but not context.
-- Legal sources were checked through **web-search snippets only**, because
-  the primary PDFs were blocked. Nothing here was read in the official PDF.
-  The lawyer or the owner must read R1–R8 in the
-  [BCP PDF of Ley 827/96](https://www.bcp.gov.py/documents/20117/213083/LEY_827_96_DE_SEGUROS.pdf/68f0897c-3e19-22c3-4904-367b1b2937a9?t=1741806943153).
+## 0. What was and was not checked (read first)
 
-## 1. Live-site findings
+| Item | Status |
+|---|---|
+| Live site, 55 sitemap URLs | **NOT AUDITED.** The cloud session's network policy blocks `seguro.com.py` (egress 403), and no search engine returned indexed pages for it. §1 is a pre-audit register built from the owner's brief (0 images, no form, no WhatsApp link) and from the planning docs. **§6 has a local scan script that produces the real per-URL table.** |
+| Primary legal texts | **Not read directly.** `bacn.gov.py`, `bcp.gov.py`, `sedeco.gov.py`, `support.google.com` and `web.archive.org` were blocked. Every citation below comes from **web-search summaries**, which are secondary sources even when the cited URL is official. Nobody has yet read these articles in the official PDF. |
+| keyword-library MCP | Not connected in the cloud session. Demand is an estimate (BUSINESS §2). |
+| prestamo reference docs | Read from `antonmarklundcom/prestamo` branch `claude/awesome-ritchie-wz1ebw` (the main branch still has the old lead-gen docs). Structure and tone reused; every legal point re-derived for insurance. |
 
-**Status: NOT RUN. The live site is unreachable from this session.** No
-finding has been invented to fill this section.
+## 1. Live-site findings (pre-audit register, by known feature)
 
-What we know from the owner's brief: 55 sitemap URLs, 0 images, no form,
-no WhatsApp link. That means no insurer logos, no capture, and no consent
-flow exist yet. The risk sits in **copy, tables and calculators**.
+Page rows for all 55 URLs are **pending**. Until §6 is run, these are checks to
+perform, not confirmed findings.
 
-Next step (the owner or any session with network access, read-only):
-
-1. `node tools/legal-audit.mjs https://seguro.com.py/sitemap.xml > docs/LEGAL-AUDIT-live.md`
-2. Read every **high** row and draft the fix from the rewrite given
-   (rules in §3). Live edits wait for the owner's go-ahead: Phase 1 does
-   not touch live content. Read every calculator and price table in full by hand.
-3. Look at the disclosure matrix. Any **NO** in the columns "No somos
-   aseguradora/corredor", "Who we are" or "/privacidad link" is a
-   sitewide footer fix, made once in the footer partial.
-4. Paste the table into this section and re-send this file to the lawyer.
-
-Expected high-risk hotspots, judged from the planned copy in §4. These
-are hypotheses to confirm, not findings:
-- pillar pages with "cuánto cuesta" ₲ figures;
-- any "mejores aseguradoras" or insurer list;
-- "cotizá" CTAs;
-- JSON-LD `InsuranceAgency`/`AggregateRating`;
-- a missing RUC or razón social in the footer.
+| URL / feature | Text or behaviour to look for | Risk | Safe rewrite / fix |
+|---|---|---|---|
+| Home, pillar pages (`/seguro-de-auto/`, etc.) | "el mejor seguro", "la mejor aseguradora", "te recomendamos" | **High** (Ley 1334 Art. 36; reads as advice) | "Información para entender y comparar coberturas." |
+| Any page | "cotizá", "cotizá ya", "contratá", "pedí tu seguro", "tu póliza en minutos" | **High** (reads as selling/quoting; Ley 827/96 Art. 70) | "Leé la guía", "Qué cubre", "Verificá una aseguradora" |
+| Any page | ₲ or US$ premiums, "desde ₲…/mes", price tables | **High** (Ley 1334 Art. 35 misleading by omission; Ley 827 Art. 129 incomplete info) | Delete, or "Ejemplo ilustrativo tomado de [fuente, fecha]. No es una cotización." |
+| Calculator or "cotizador" | no disclaimer, default price, "contratar" button | **High** | DISCLAIMERS §3, or remove and replace with a no-price explainer |
+| Insurer pages (`/aseguradoras/…`) | insurer names with praise, logos, ratings, "convertimos a comparación" | **High** | Neutral name in plain text, link to the entity's official site and the SIS register; no logo; no stars |
+| Any page | "garantizado", "cobertura total", "cubre todo", "sin letra chica", "sin requisitos" | **High** | "Las coberturas y exclusiones las define cada póliza." |
+| Any page | "fácil", "rápido", "al instante", "en 2 minutos" | **High** | Remove ease and speed promises |
+| Any page | "últimos días", "oferta", "no esperes", fear copy ("¿y si te pasa algo?") | Medium | Remove; neutral, factual tone |
+| Any page | claim that SOA/SOAT is mandatory | **High** (appears false per the sources in R-SOA) | State the verified status with source and date, or remove |
+| Any page | prepaga described as a "seguro" | Medium | Say prepaga is supervised by the Superintendencia de Salud (R-PREPAGA) |
+| JSON-LD | `InsuranceAgency`, `Offer`, price, `AggregateRating` | **High** | `Organization`, `WebSite`, `Article`, `FAQPage`, `BreadcrumbList` only |
+| Footer / top strip | missing "Sitio informativo…" text | **High** | DISCLAIMERS §1–§2 on every page |
+| Footer | company details invented or half-filled | Medium | Leave `null` until confirmed; show a contact e-mail only |
+| Forms / WhatsApp | any consumer form or WhatsApp link | **High** (contradicts the model; consumer data without consent flow) | Remove; only `/contacto` partner form |
+| Tracking | analytics or ad pixels firing before consent | Medium | Consent-gate analytics; no ad pixels at all |
+| Guides | no update date, no sources, no end note | Medium | DISCLAIMERS §5 |
+| Directory (if any) | entity not found in the SIS register; ranking order; logos | **High** (Art. 129; SIS warns about unauthorised entities, R-WARN) | Alphabetical, verified-on date and register per entry, no logos; remove what cannot be verified |
 
 ## 2. Rules, with sources
 
-| # | Rule | Source (as seen) | Status | Consequence for us |
+### 2.1 Insurance regulation
+
+| # | Rule | Citation and source | Type | Conf. | Consequence for us |
+|---|---|---|---|---|---|
+| R-827 | Insurance is regulated by the **Superintendencia de Seguros (SIS), inside the BCP**, under **Ley 827/96 De Seguros**. A bill from the MEF/BCP to replace Ley 827/96 was before the Senate Legislation Commission on 29 Jun 2026 (study continued; not law) | [BCP PDF](https://www.bcp.gov.py/documents/20117/213083/LEY_827_96_DE_SEGUROS.pdf/68f0897c-3e19-22c3-4904-367b1b2937a9?t=1741806943153); [Senate news](https://www.senado.gov.py/index.php/menu-dircom/sub-menu-noticias-comisiones/proseguira-el-estudio-de-la-iniciativa-legislativa-sobre-seguros-2026-06-29-16-51-44.html) | official URLs; content via search summary | H (regulator, law), M (bill) | Put "revisado el [fecha]" on legal pages; re-check the bill before launch |
+| R-70 | "La intermediación en la contratación de seguros, a excepción de los seguros directos, sólo podrá ser ejercida por los agentes y corredores de seguros inscriptos" | Ley 827/96 **Art. 70** (same BCP PDF; [BACN](https://www.bacn.gov.py/leyes-paraguayas/703/ley-n-827-de-seguros)) | official via snippet | H | We never intermediate: no quote, no proposal, no part in contracting |
+| R-DEF | Definition: agente/productor/corredor = person authorised by the control authority "que intermedie en la contratación de seguros". The earlier doc's "≈Art. 69" is **wrong** (Art. 69 is on confidentiality); the defining article number is **unverified** | Ley 827/96 (same sources) | official via snippet | M | Cite without an article number until the lawyer confirms |
+| R-76 | The agent or corredor proposes the operation "por escrito, bajo su firma" | Ley 827/96 **Art. 76** (BACN; [vLex](https://py.vlex.com/vid/ley-n-827-96-641256181)) | snippet | M | Proposals are the intermediary's work, not ours |
+| R-82 | Persons not registered "no tendrán derecho a percibir comisión alguna" for intermediation | Ley 827/96 **Art. 82** ([Justia](https://paraguay.justia.com/nacionales/leyes/ley-827-feb-12-1996/gdoc)) | snippet | M | **Why a later per-policy model is dangerous** (BUSINESS §5) |
+| R-129 | Prohibition of false, incomplete, anonymous, misleading or ambiguous insurance information "por medio de anuncios, circulares, folletos u otros medios" | Ley 827/96 **Art. 129** "Información al público" (BCP PDF) | official via snippet | M | **Applies directly to our copy.** No anonymous site (identify the operator), no incomplete price or coverage claims, no wording that could be misread as an offer |
+| R-109 | Sanctions on insurers: warning, fine up to 1,000 jornales mínimos, suspension up to 1 year, revocation; Arts. 121–122 sanction insurers that work with unregistered auxiliaries | Ley 827/96 **Arts. 109, 121, 122** | snippet | M | Context only. Sanctions on a non-regulated site: UNVERIFIED |
+| R-102 | **Res. SS.SG. 102/08 (2 Dec 2008)** regulates "la oferta, promoción, comercialización y prestación del servicio de seguros"; only authorised insurers may offer, directly or via agents or brokers; adopted after complaints about unauthorised entities. Operative articles not seen | [baselegal](https://baselegal.com.py/docs/430801ba-0030-11f0-9450-525400343722) | republished official text, summary only | M (exists), UNVERIFIED (scope) | **Biggest open legal question:** does neutral information, a directory, or premium examples count as "promoción" or "oferta"? Ask the lawyer (checklist A2) |
+| R-WEBSITES | No SIS rule on comparators, neutral information sites or "canales digitales" for third parties was found. Res. SS.SG. 210/2025 sets minimum conditions for **selling** by electronic channels, binding on sellers | [Vouga](https://www.vouga.com.py/la-superintendencia-de-seguros-regula-la-comercializacion-de-seguros-por-medios-electronicos-y-canales-no-presenciales/) | law firm | M | The information model stays clear of the sale. Absence of a rule is not a safe harbour |
+| R-REG | Registration of agents, corredores, liquidadores: Res. SS.SG. 031/2026 (30 Jan 2026), amended by Res. 117/2026; annual windows with quotas; the SIS publishes registers (path: BCP > Superintendencias > Superintendencia de Seguros > Registros de la SIS > Auxiliares del Seguro) and warnings naming unauthorised firms | [BCP PDF](https://www.bcp.gov.py/documents/20117/753661/Resoluci%C3%B3n+SS.SG.+N%C2%B0+031_2026.pdf/3e00fd0b-9f62-b3e5-4797-da5b5218224e?t=1770118492670); [BCP inscripciones](https://www.bcp.gov.py/en/inscripciones); [Vouga](https://www.vouga.com.py/actualizacion-del-regimen-de-matriculacion-de-auxiliares-de-seguros-en-paraguay/) | official + law firm | M | "Cómo verificar" guide links to the SIS registers. **Exact register title unverified** |
+| R-WARN | The SIS issues public warnings about unauthorised firms (e.g. named in BCP communiqués and press, 2025) | [BCP communiqué](https://www.bcp.gov.py/web/institucional/w/comunicado-al-p%C3%BAblico-en-general-3); [ABC 2025-02-14](https://www.abc.com.py/negocios/2025/02/14/superintendencia-de-seguros-advierte-sobre-firma-que-no-esta-autorizada-para-operar/) | official + press | M | Never list an entity we cannot find in the register |
+| R-COMPLAINT | A consumer complains first to the insurer, then to the SIS through the "Plataforma de Asistencia al Usuario"; extrajudicial, voluntary, free; also in Guaraní | [100% Seguro](https://100seguro.com.py/la-superintendencia-de-seguros-lanzo-su-plataforma-de-consultas-quejas-y-reclamos/); [BCP](https://www.bcp.gov.py/en/asistencia-al-usuario-de-la-sis) | press + official | M | Material for the "cómo reclamar" guide; verify the URL on the day of publishing |
+
+### 2.2 Mandatory insurance and health
+
+| # | Rule | Citation and source | Conf. | Consequence |
 |---|---|---|---|---|
-| R1 | Intermediation "sólo podrá ser ejercida por los agentes y corredores de seguros inscriptos" | Ley 827/96 **Art. 70** — [BCP PDF](https://www.bcp.gov.py/documents/20117/213083/LEY_827_96_DE_SEGUROS.pdf/68f0897c-3e19-22c3-4904-367b1b2937a9?t=1741806943153), [BACN](https://www.bacn.gov.py/leyes-paraguayas/703/ley-n-827-de-seguros) | CONFIRMED (text quoted in snippet) | We must never intermediate: no advice, no quote, no proposal, no part in the contracting |
-| R2 | Definition: agente/productor/corredor = authorised person "que intermedie en la contratación de seguros" | Ley 827/96, definitions article | Text CONFIRMED; **article number unverified**. `docs/10` "≈Art. 69" is **wrong**: Art. 69 is "Secreto de las actuaciones" | Correct `docs/10` §2 |
-| R3 | Agents (natural persons) and corredores (legal entities) must prove "idoneidad" to register | Ley 827/96 Arts. 71–72 (same sources) | CONFIRMED (snippet) | — |
-| R4 | The agent/corredor proposes operations "por escrito, bajo su firma" | Ley 827/96 **Art. 76** (BACN, [vLex](https://py.vlex.com/vid/ley-n-827-96-641256181)) | CONFIRMED (snippet) | Proposals and quotes live on the corredor's side, never on our site |
-| R5 | Persons not registered "no tendrán derecho a percibir comisión alguna" | Ley 827/96 **Art. 82** "Personas no inscriptas" ([Justia](https://paraguay.justia.com/nacionales/leyes/ley-827-feb-12-1996/gdoc), BACN) | CONFIRMED (snippet) | No commission, no % of premium, likely no per-policy fee (BUSINESS §3) |
-| R6 | Sanctions on insurers: warning, fine up to 1,000 jornales mínimos, suspension up to 1 year, revocation | Ley 827/96 **Art. 109** | CONFIRMED (snippet). The range "109–116" in `docs/10` is not confirmed | — |
-| R7 | Insurers are sanctioned for operating with non-registered or expired auxiliaries; the same procedure applies to agents and corredores | Ley 827/96 **Arts. 121, 122** | CONFIRMED (snippet) | Our partner carries real risk if we look like an unregistered auxiliary. Contract clause F9 |
-| R8 | **Ban on false, incomplete, anonymous, misleading or ambiguous insurance information** "por medio de anuncios, circulares, folletos u otros medios" | Ley 827/96 **Art. 129** "Información al público" | CONFIRMED (snippet). **New: not in `docs/10`** | Applies directly to our copy: no anonymous site (identify the operator), no incomplete price or coverage claims |
-| R9 | Offer, promotion and commercialisation of insurance only by SIS-authorised insurers, directly or via agents/corredores; promotion by unauthorised persons sanctioned | **Res. SS.SG. 102/08** (2 Dec 2008) — [baselegal](https://baselegal.com.py/docs/430801ba-0030-11f0-9450-525400343722) | Existence CONFIRMED (secondary). **Scope and sanction list UNVERIFIED — ask the lawyer (B2)**. **New** | **The biggest open risk.** "Promoción" by us may itself need to be done on behalf of, and approved by, the licensed corredor |
-| R10 | Banks intermediating insurance are restricted; courts upheld the SIS | Res. SS.RG. 3/2000; Tribunal de Cuentas Ac. y Sent. 18/2019; CSJ Ac. y Sent. 1696/2020 — [BCP comunicado](https://www.bcp.gov.py/web/institucional/w/comunicado-corretaje-de-seguros-por-entidades-financieras) | CONFIRMED (secondary) | The SIS actively polices third-party distribution channels |
-| R11 | Intermediation commission cap: 30% of tariff premium (vida, cuenta ajena) | Res. SS.SG. 45/13; Circular SS.SG. 84/2023 — [BCP PDF](https://www.bcp.gov.py/documents/20117/0/2013-08-08-res-sssgn-045-13-limite-de-comisiones-por-intermediacion.pdf/fc027f62-f47e-5530-fec9-7819ffdb756b?t=1744818680412) | CONFIRMED (snippet) | Commissions are regulated money. Any share passing to us is a problem |
-| R12 | Digital/remote sales: web, social, messaging, phone; e-signature; free, express, unequivocal consent; IP/metadata kept 2 years after the policy ends | Res. SS.SG. 210 (25 Sep 2025) — [Vouga](https://www.vouga.com.py/la-superintendencia-de-seguros-regula-la-comercializacion-de-seguros-por-medios-electronicos-y-canales-no-presenciales/) | CONFIRMED (secondary) | Addressed to regulated entities. The sale flow stays on the corredor's systems |
-| R13 | Matriculación: annual windows, quotas, 3-year validity, lapses after 1 year with no operations; non-residents ineligible | Res. SS.SG. 031/2026 ([BCP PDF](https://www.bcp.gov.py/documents/20117/753661/Resoluci%C3%B3n+SS.SG.+N%C2%B0+031_2026.pdf/3e00fd0b-9f62-b3e5-4797-da5b5218224e?t=1770118492670)), amended by Res. 117/2026 | Resolution CONFIRMED; the non-resident bar is secondary only ([100% Seguro](https://100seguro.com.py/la-sis-redefinio-por-completo-el-regimen-de-matriculacion-de-agentes-corredores-de-seguros-y-liquidadores/)) | Licensing ourselves is not a near-term option |
-| R14 | Data protection: promulgated 27 Nov 2025, 24-month vacatio legis → about end of Nov 2027. Consent free, express, specific, informed, unequivocal. 72 h breach notice. Fines 20–2,500 jornales, up to 5,000 (sensitive) and 10,000 (minors). International transfer only with adequacy or safeguards. Agency inside MITIC | Ley **7593/2025** — [BACN](https://www.bacn.gov.py/leyes-paraguayas/12924/ley-n-7593-2025-de-protecci-n-de-datos-personales-en-la-rep-blica-del-paraguay); [Berke](https://www.berke.com.py/analisis-de-la-ley-n-7593-2025-de-proteccion-de-datos-personales-de-paraguay1/); [smartfense](https://smartfense.com/cumplimiento/ley-proteccion-datos-paraguay/) | CONFIRMED (secondary only; **article numbers unverified**). The reglamento was not found (unverified) | Build to it now (BUSINESS §4) |
-| R15 | Credit data: consent free, express, informed, documented, revocable; burden of proof on the controller | Ley 6534/2020 ([BACN](https://www.bacn.gov.py/leyes-paraguayas/9417/)) | CONFIRMED (snippet) | Out of scope as long as we collect no credit data |
-| R16 | Misleading advertising "incluso por omisión" is prohibited | Ley 1334/98 **Art. 35** — [BCP PDF](https://www.bcp.gov.py/documents/20117/213083/LEY_1334_98_DE_DEFENSA_AL_CONSUMIDOR_Y_DEL_USUARIO.pdf/8e97aae7-421f-db1a-8d0e-39fd0b58fa20?t=1741806943360) | CONFIRMED (snippet) | No price, coverage or saving claims without full conditions |
-| R17 | Comparative advertising banned where "declaraciones generales e indiscriminadas" induce belief in superiority | Ley 1334/98 **Art. 36** (same) | CONFIRMED (snippet). Ley 6366/2019 does not amend it (it changed Arts. 4, 6, 10, 15, 29) | No "mejor", no rankings |
-| R18 | Provider identification: denominación social, domicilio, owners' names, email, phone, privacy policy on the website | Ley 4868/2013 — **Art. 7 or Art. 28 (sources conflict)**; Decreto 1165/2014 — [ACRAIZ PDF](https://www.acraiz.gov.py/adjunt/Leyes%20y%20Decretos/ley_4868_comercio_electrnico_26-02-13.pdf) | Content CONFIRMED (snippet); **article number UNVERIFIED**. RUC not expressly required (add it anyway) | Footer + `/sobre-nosotros` |
-| R19 | Commercial e-communications must be identifiable as such and name the sender; unsolicited ones must say so and offer an easy opt-out | Ley 4868/2013 **Arts. 21, 23** | CONFIRMED (snippet). **New** | WhatsApp/email replies identify us; opt-out in every message |
-| R20 | Unsolicited mobile advertising prohibited; check the SEDECO "No Molestar" register; stop within 30 days; strict liability including for third parties acting for the company. **Covers WhatsApp and Telegram** | Ley 5830/2017; Decreto 8000/2017; Res. SDCU 80/2018 Art. 6 — [nomolestar.sedeco.gov.py](https://nomolestar.sedeco.gov.py/); [TEDIC](https://www.tedic.org/wp-content/uploads/2025/09/Claro-vs-Sedeco-WEB.pdf) | CONFIRMED (official site + secondary). `docs/10` Q4 is answered | No outbound WhatsApp. The corredor contacts only people who asked (lawyer E3 on registered numbers) |
-| R21 | IVA 10% on services; IRE 10% (IRE SIMPLE below ₲ 2,000 M/year) | Ley 6380/2019 — [DNIT](https://www.dnit.gov.py/en/web/portal-institucional/w/d-ley-n-6380-19) | CONFIRMED (secondary) | Lead fees invoiced with IVA 10% |
-| R22 | New RUC legal entities must invoice **only electronically** (SIFEN) since 1 Apr 2025 | [La Nación 2025-04-01](https://www.lanacion.com.py/negocios/2025/04/01/desde-hoy-nuevos-contribuyentes-deberan-facturar-exclusivamente-de-forma-electronica/); DNIT RG 52/2026 | CONFIRMED (secondary) | SIFEN from the first invoice |
-| R23 | EAS: single shareholder allowed, legal personality on registration | Ley 6480/2020; Decreto 3998/2020 — [Vouga](https://www.vouga.com.py/en/el-poder-ejecutivo-promulgo-la-ley-6480-20-que-crea-la-empresa-por-acciones-simplificadas/) | CONFIRMED (secondary) | Entity vehicle |
-| R24 | INR withholding on PY-source payments to non-residents | Ley 6380/2019; Decreto 3181/2019 — [DNIT cartilla](https://www.dnit.gov.py/documents/20123/218215/Cartilla+Informativa+sobre+el+INR.pdf/6f39e37a-cafb-57ce-7585-3d15de874514?t=1684450785972.pdf) | Existence CONFIRMED; **rate/base UNVERIFIED** | Relevant if the owner invoices from abroad before the EAS exists |
-| R25 | Google Ads financial services: physical address, fees, basis of affiliation visible without a click; verification covers insurance; unlicensed advertisers verified through a licensed party | [answer/2464998](https://support.google.com/adspolicy/answer/2464998), [answer/15187149](https://support.google.com/adspolicy/answer/15187149), [answer/12390454](https://support.google.com/adspolicy/answer/12390454), [G2RS](https://g2risksolutions.com/financial-services/) | CONFIRMED (snippet). **Paraguay on the verification list: UNVERIFIED** | BUSINESS §5 |
-| R26 | Google: misrepresentation / implied affiliation = egregious (suspension); unreliable claims; data collection needs clear purpose and security; health = sensitive for personalized ads | [15938071](https://support.google.com/adspolicy/answer/15938071), [15936857](https://support.google.com/adspolicy/answer/15936857), [6020956](https://support.google.com/adspolicy/answer/6020956), [143465](https://support.google.com/adspolicy/answer/143465) | CONFIRMED (snippet) | No insurer or BCP/SIS names in ads |
-| R27 | Meta: insurance ads 18+; may require regulator authorisation in the target country | [Meta financial services policy](https://transparency.meta.com/policies/ad-standards/restricted-goods-services/financial-services/) | CONFIRMED (snippet); Paraguay scope UNVERIFIED | — |
+| R-SOA | **No SOAT/SOA is in force, per the sources seen.** Ley 4950/2013 created the SOAT; **Ley 5150/2014 repealed it** (promulgated about 20 Feb 2014). A "SOA" bill was approved by the Senate with modifications and then stalled; the insurers' association (APCS) was pushing to revive it | [BACN Ley 5150](https://www.bacn.gov.py/leyes-paraguayas/11356/ley-n-5150-deroga-la-ley-n-4950-que-crea-el-seguro-obligatorio-de-accidentes-de-transito-soat); [Última Hora](https://www.ultimahora.com/buscan-reimpulsar-el-seguro-obligatorio-los-automoviles-n3061684); [100% Seguro](https://100seguro.com.py/asociacion-paraguaya-de-companias-de-seguros-impulsa-proyecto-de-seguro-obligatorio-automotor/) | M-H | Never say a SOAT/SOA is mandatory. **Conflict:** a summary of Ley 5016/14 (Tránsito) Art. 95 mentions the SOAT after the repeal ([BACN](https://www.bacn.gov.py/leyes-paraguayas/4418/ley-n-5016-nacional-de-transito-y-seguridad-vial)); not reconciled: lawyer |
+| R-CARTAVERDE | Carta Verde (RC vehicular for Mercosur travel) is the de-facto required cover for foreign trips; SIS Res. SS.RG. 2/99 appears by title only | [BCP PDF](https://www.bcp.gov.py/documents/20117/0/1999-02-05-res-ssrgn-002-99-responsabilidad-civil-vehicular-carta-verde_2.pdf/76507126-e674-1fcd-8d8f-9ea0a0a4724f?t=1744215069778); [Broker Codas](https://www.brokercodas.com.py/carta-verde) | L (content), M (practice) | State "se exige para circular en países del Mercosur" only after reading the official text |
+| R-OTHERMAND | Ley 750/1961 (passenger accident insurance for public land transport) seen as a summary of a Justia document; current enforcement unknown. Workers' accident cover is through IPS (employer contribution), not a private ART | [Justia](https://docs.paraguay.justia.com/nacionales/leyes/ley-750-aug-31-1961.doc); [Deel](https://www.deel.com/es/blog/aportes-ips-en-paraguay/) | L | Do not write a "mandatory insurance" list beyond what is verified |
+| R-PREPAGA | **Medicina prepaga is supervised by the Superintendencia de Salud (Ministerio de Salud), not the SIS.** Ley 1032/1996 (Sistema Nacional de Salud) created it; Ley 2319/2006 sets its functions. Do **not** cite "Ley 7421" (it appears to be an unrelated forest-fire emergency law). A dedicated prepaga law appears only as a bill | [ABC 2025](https://www.abc.com.py/edicion-impresa/suplementos/economico/2025/03/16/el-seguro-de-riesgos-y-la-medicina-prepaga/); [BACN Ley 2319](https://www.bacn.gov.py/leyes-paraguayas/1880/establece-las-funciones-y-competencias-de-la-superintendencia-de-salud-creada-por-ley-n-1032-de-fecha-30-de-diciembre-de-1996-que-crea-el-sistema-nacional-de-salud) | M-H | Do not call prepaga a "seguro"; explain who regulates which. Advertising rules for prepaga: UNVERIFIED |
+| R-OTHERLINES | Regulatory status of travel assistance, pet insurance, credit life, agricultural insurance: not found (commercial pages only) | n/a | UNVERIFIED | Write only neutral, general statements; ask the lawyer before a dedicated guide |
 
-**Corrections to `docs/10`:**
-- The definition is not "≈Art. 69".
-- Add R8 (Art. 129), R9 (Res. 102/08), R10, R11, R19 and R20 (WhatsApp is covered).
-- The Ley 4868 article number is uncertain.
-- Sanctions: only Art. 109 and Arts. 121–122 are confirmed.
+### 2.3 Consumer protection and site disclosures
 
-**Reading of the model against these rules (for the lawyer to confirm):**
-- The marketing-partner model does not rest on any written carve-out. No
-  SIS rule on comparators or lead generation was found.
-- It rests on staying before "la contratación" (R1/R2) and on not being
-  paid a commission (R5).
-- R9 is the weak point. If Res. 102/08 reserves "promoción" of insurance
-  to authorised entities and their auxiliaries, our pages must be framed
-  as **advertising produced for, and approved by, the licensed corredor**.
-  They cannot be our own independent promotion of insurers.
+| # | Rule | Citation and source | Conf. | Consequence |
+|---|---|---|---|---|
+| R-35 | Misleading advertising is prohibited, "incluso por omisión" | Ley 1334/98 **Art. 35** ([BCP PDF](https://www.bcp.gov.py/documents/20117/213083/LEY_1334_98_DE_DEFENSA_AL_CONSUMIDOR_Y_DEL_USUARIO.pdf/8e97aae7-421f-db1a-8d0e-39fd0b58fa20?t=1741806943360)) | M (snippet of official text) | No figure without source and date; no omission of conditions |
+| R-36 | Comparative advertising not allowed where "declaraciones generales e indiscriminadas" induce belief in a product's superiority | Ley 1334/98 **Art. 36** (same) | M | No "el mejor", no rankings |
+| R-SEDECO | SEDECO is the consumer authority. Any SEDECO rule or action specific to insurance advertising: **not found**. Whether SEDECO or the SIS handles insurance complaints: unverified (SIS is the proven channel) | n/a | UNVERIFIED | |
+| R-4868 | Providers must publish permanently and freely: denominación social, domicilio, owners' names, e-mail and phone. **Article number conflict:** one source says Art. 7, the decree summary says "Artículo 28". Whether a purely informational site is in scope: unverified. RUC is not expressly required | [BACN Ley 4868](https://www.bacn.gov.py/leyes-paraguayas/961/ley-n-4868-comercio-electronico); [Decreto 1165/2014](https://baselegal.com.py/docs/cb500e7b-fcd8-11e9-8e28-525400c761ca/text) | M (content), L (article) | Publish the identification block anyway once the company exists |
+| R-4868B | Commercial communications must be identifiable and name the sender; unsolicited ones must say so and offer an easy opt-out (Arts. 21, 23 per a summary) | Ley 4868/2013 | L-M | Applies to our replies to partners |
 
-## 3. Copy rules applied by the audit script (and by every future edit)
+### 2.4 Data protection, spam, cookies
 
-| Risk | Pattern (examples) | Why | Safe rewrite |
-|---|---|---|---|
-| High | "el mejor seguro", "la mejor aseguradora", "la mejor cobertura" | Recommendation/advice (intermediation) + general superiority claim (Ley 1334 Art. 36) | "Información para comparar coberturas de aseguradoras habilitadas." |
-| High | "te recomendamos", "te asesoramos", "nuestros expertos", "asesoramiento gratis" | Advice is the corredor's licensed work | "Un corredor matriculado ante la SIS te asesora. Nosotros no asesoramos." |
-| High | "ideal para vos", "a tu medida", "elegimos por vos" | Personalized recommendation | "Consultá con un corredor habilitado qué cobertura corresponde a tu caso." |
-| High | ₲/Gs./US$ amounts, "desde ₲…/mes", premium tables, calculators that output a premium | Price that can read as a binding quote. Art. 35 misleading-by-omission risk | Remove. At most a partner-issued range: "referencial, no vinculante; la prima la define la aseguradora" + source + date |
-| High | "garantizado", "cobertura total", "cubre todo", "sin letra chica" | Coverage/guarantee claims we cannot back | "Coberturas, exclusiones y condiciones según la póliza de cada aseguradora." |
-| High | "contratá ya", "tu póliza en minutos", "te cotizamos", "gestionamos tu siniestro" | Taking part in the sale, the proposal or claims | "Dejá tus datos y un corredor habilitado te contacta." |
-| High | Insurer **logos**; insurer name + "mejor/recomendado/líder/socio oficial"; JSON-LD `InsuranceAgency`, `Offer`/price | Implied endorsement or affiliation, or self-description as an agency (also a Google Ads misrepresentation risk) | Name in plain text only, neutral, + "Marca de su titular; sin afiliación". Schema: `Organization` |
-| Medium | "top 5", "ranking", "#1", "más barato", "mejor precio", "ahorrá hasta 40%" | A ranking reads as advice. Savings claims need proof | Alphabetical list of SIS-authorised insurers linking to the SIS registry. No savings claims |
-| Medium | "oferta", "solo hoy", "últimos días", "no esperes" | False urgency (Art. 35; Google unreliable claims) | "Pedir contacto no tiene costo ni compromiso." |
-| Medium | "cotizá", "obtené tu cotización", "compará precios" | Implies we issue the quote | "Pedí que te contacte un corredor habilitado." |
-| Medium | "sin franquicia", "sin carencia", "sin exámenes", "incluye grúa" | A coverage claim without an identified source | "Algunos planes pueden incluir… según la póliza." |
-| Low | "expertos", "especialistas", neutral insurer mentions, "comparar" | Fine in context. Attribute expertise to the corredor | — |
+| # | Rule | Citation and source | Conf. | Consequence |
+|---|---|---|---|---|
+| R-7593 | **Ley 7593/2025** de Protección de Datos Personales, promulgated **27 Nov 2025**, **24-month vacatio legis** → substantive obligations and fines from about **27 Nov 2027** (MITIC says so). No earlier transitional article found. **No reglamento and no operating Agency found as of Oct 2026**: the Agencia Nacional de Protección de Datos Personales (inside MITIC) was reportedly not in the 2026 budget | [BACN](https://www.bacn.gov.py/leyes-paraguayas/12924/ley-n-7593-2025-de-protecci-n-de-datos-personales-en-la-rep-blica-del-paraguay); [Berke](https://www.berke.com.py/analisis-de-la-ley-n-7593-2025-de-proteccion-de-datos-personales-de-paraguay1/); [MITIC](https://mitic.gov.py/mitic-informa-sobre-el-alcance-de-la-ley-de-proteccion-de-datos-personales/); [La Tribuna 2026-04-20](https://www.latribuna.com.py/nacionales/2026/04/20/mitic-informa-sobre-los-alcances-de-la-nueva-ley-de-proteccion-de-datos-personales-que-regira-desde-2027/) | M | Build the partner form to this standard now |
+| R-SENSITIVE | **Health data is sensitive** (also racial/ethnic origin, religious/philosophical beliefs, union/political affiliation, sexual orientation, genetic or biometric data). Fines reported: general 20–2,500 jornales, up to 5,000 for sensitive data, 10,000 for minors' sensitive data | Berke; [Deloitte](https://www.deloitte.com/latam/es/services/legal/perspectives/nueva-ley-de-proteccion-de-datos-personales-en-paraguay.html); [smartfense](https://smartfense.com/cumplimiento/ley-proteccion-datos-paraguay/) | M (article numbers unverified) | **We never collect health data.** The partner form forbids it in helper text and the deflection |
+| R-BASIS | Legal bases listed in summaries: consent; legal obligation; contract/pre-contract at the subject's request; legitimate interest with a documented balancing test. Consent must be prior, free, informed, unequivocal, by statement or clear affirmative act | law-firm summaries (Avanzia, Altra, Iruñ Villamayor) | M | For a partner contact form, **consent is the safest basis** (that mapping is our inference, not sourced) |
+| R-RIGHTS | Access, rectification, deletion, opposition, portability, withdrawal of consent; response period 30 calendar days (one source: "Art. 26") | [lawwwing](https://lawwwing.com/en/paraguay-data-protection-7593-20/) | L-M | `datos@` mailbox; answer in ≤ 30 days |
+| R-NOTICE | Privacy notice in plain language: controller identity, data categories, purposes and legal basis, recipients, retention, rights, transfers | law-firm summaries | M | Privacy policy section for the partner form (PARTNER-FORM) |
+| R-TRANSFER | International transfer only to countries the Agency finds adequate, or with safeguards (standard contractual clauses, BCRs). No adequacy list exists yet. Processors need a written contract | law-firm summaries | M | VenderCRM and the e-mail provider may be abroad: lawyer (checklist C5) |
+| R-COOKIES | **No Paraguay-specific cookie rule or guidance found.** Practice: prior consent, revocable, no pre-ticked boxes, "Aceptar" and "Rechazar" equal | n/a | UNVERIFIED | Follow 7593 principles |
+| R-6534 | Ley 6534/2020 governs **credit data** (consent free, express, documented, revocable). Not touched: we hold no credit data | [BACN](https://www.bacn.gov.py/leyes-paraguayas/9417/) | M | Keep it that way |
+| R-5830 | Ley 5830/2017, Decreto 8000/2017, Res. SEDECO SDCU 80/2018 Art. 6: no unsolicited advertising by mobile; check the **No Molestar** register; strict liability, including for third parties; **the register covers WhatsApp and Telegram** | [No Molestar](https://nomolestar.sedeco.gov.py/); [TEDIC](https://www.tedic.org/wp-content/uploads/2025/09/Claro-vs-Sedeco-WEB.pdf) | H | We send no marketing messages. Replies to partners only |
 
-**Required on every page** (checked by the script's disclosure matrix):
+### 2.5 Company, tax, IP
 
-1. Footer: *"seguro.com.py es un servicio de publicidad y referencia
-   operado por [razón social], RUC [xxx], [dirección], [email]. No somos
-   aseguradora, agente ni corredor de seguros; no intermediamos ni
-   asesoramos. Los seguros los ofrecen aseguradoras autorizadas por la
-   Superintendencia de Seguros del BCP, a través de corredores
-   matriculados."* + links to `/sobre-nosotros`, `/privacidad`, `/terminos`.
-2. On every page that names an insurer: a link to that insurer's
-   **official site/channel**, plus a link to the SIS list of authorised
-   insurers.
-3. `/sobre-nosotros`: who we are, how we make money ("el corredor asociado
-   nos paga un monto fijo por cada contacto; vos no pagás nada y eso no
-   cambia el precio de tu seguro" — wording unverified, lawyer E2), and the
-   name and matrícula of the partner corredor once one is signed.
+| # | Rule | Citation and source | Conf. | Consequence |
+|---|---|---|---|---|
+| R-EAS | EAS (Ley 6480/2020, Decreto 3998/2020): single shareholder allowed; legal personality on registration. Legal representative needs a Paraguayan cédula (from the earlier research; unverified here) | [Vouga](https://www.vouga.com.py/en/el-poder-ejecutivo-promulgo-la-ley-6480-20-que-crea-la-empresa-por-acciones-simplificadas/) | M | Footer details wait for the company |
+| R-TAX | IVA 10% on services; IRE 10% general (Ley 6380/2019); IRE SIMPLE for turnover up to ₲ 2,000 M (10% on a presumed 30% net, per two law-firm blogs). Whether an EAS can use IRE SIMPLE: unverified. **A content site with no revenue has nothing to invoice yet.** New RUCs must issue e-invoices (SIFEN) since 1 Apr 2025 | [DNIT](https://www.dnit.gov.py/en/web/portal-institucional/w/d-ley-n-6380-19); [La Nación](https://www.lanacion.com.py/negocios/2025/04/01/desde-hoy-nuevos-contribuyentes-deberan-facturar-exclusivamente-de-forma-electronica/); [Ecovis](https://ecovisparaguay.com.py/impuesto-a-la-renta-empresarial-regimen-re-simple-en-paraguay/) | M | Accountant when revenue appears |
+| R-ADSENSE | IVA/INR rules found on digital services apply to **purchases** from non-residents (your own Google spend), **not** to AdSense income. Treatment of AdSense or foreign sponsorship income (export of services?): **UNVERIFIED**. Local ads, sponsored content and affiliate commissions: IVA treatment unverified | [DNIT](https://www.dnit.gov.py/documents/44828/0/SERVICIOS+DIGITALES.-.pdf/8ae189f8-d965-de75-a5b5-6f6f8e858511?t=1685034754329.pdf); [Ferrere](https://www.ferrere.com/es/novedades/newsletter-retenciones-de-impuestos-por-servicios-digitales-en-paraguay/) | L | Deferred monetisation: accountant first |
+| R-MARCAS | Ley 1294/98 de Marcas gives the holder the right to act against infringing use. Nothing seen on nominative or referential use. Copyright (Ley 1328/98) on republishing insurer documents: article and scope unverified | [BACN Ley 1294](https://www.bacn.gov.py/leyes-paraguayas/862/ley-n-1294-de-marcas); [BACN Ley 1328](https://www.bacn.gov.py/leyes-paraguayas/908/ley-n-1328-derecho-de-autor-y-derechos-conexos) | L | Insurer names in plain text; **no logos**; short attributed quotes only; no copying of policy wording |
+| R-HONOR | Código Penal Arts. 150 (calumnia), 151 (difamación), 152 (injuria), per a summary | [CELE](https://observatoriolegislativocele.com/paraguay-codigo-penal-delitos-contra-el-honor-y-la-reputacion-1997/) | M | Factual, sourced, dated statements about named insurers; offer a right of reply |
 
-## 4. Planned copy in the repo that already breaks these rules
+## 3. Corrections to the earlier planning docs (not applied here)
 
-These are in the planning docs, not (as far as we know) on the live site.
-Fix before any build uses them.
+- `docs/10-legal-compliance-paraguay.md` (lead-gen era): the agent/corredor
+  definition is not Art. 69. Add Art. 129, Res. 102/08, the Ley 7593 detail above
+  and the WhatsApp finding (No Molestar covers WhatsApp). Its "lead-gen carve-out"
+  analysis does not apply to this model.
+- `docs/03-site-structure-seo.md`: remove `InsuranceAgency` and `AggregateRating`
+  markup; `/cotizar/`, `/lp/` and `/socios/` do not belong to the info model.
+- `docs/07-opportunities.md`: reviews of insurers, a "precio estimado" widget and
+  dealer rev-share conflict with this model.
 
-| Where | Exact text | Risk | Change |
-|---|---|---|---|
-| docs/03 L36–38, docs/08 L47 | `/aseguradoras/mapfre/`, `/aseguradoras/la-consolidada/` brand pages "we rank + convert them to comparison" | High | Keep brand pages factual (contact, official links, SIS status). No "convert to comparison" CTA until lawyer B7 |
-| docs/03 L102–103 | "`AggregateRating` … `InsuranceAgency` for partner/brand pages" | High | `Organization` only. No ratings of insurers |
-| docs/07 §3 | "Reviews of insurers … Trustpilot-of-insurance-PY" | High | Drop. Reviews of insurers = ranking/endorsement |
-| docs/04 L21 | `/lp/seguro-auto-barato/` "desde ₲ …/mes" | High | No price angle in LPs |
-| docs/04 L23 | `/lp/seguro-moto-ya/` "moto + urgency" | Medium | No urgency |
-| docs/04 L20, docs/03 L113 | "cotizá en 2 minutos", "Cotizá tu seguro →" | Medium | "Pedí que te contacte un corredor" |
-| docs/04 L52 | Remarketing "terminá tu cotización" | Medium | Remarketing only with consent; no health pages |
-| docs/07 §2 | "precio estimado" widget from partner rate cards | High | Only partner-issued, labelled ranges, after lawyer B4b |
-| docs/07 §5 | Dealer/bank widget "on rev-share" | High | Revenue share on insurance sales = commission. Fixed fees only |
-| docs/03 L124 | "revisado por" a licensed broker | Low | OK if true and the broker is named with matrícula |
-| docs/05 L137 | Consent "…compartidos con las aseguradoras/corredores seleccionados…" | Medium | Name the recipient (BUSINESS §4 v1 text) |
+## 4. Advertising platforms
 
-## 5. Unverified items (ask the lawyer)
+Not applicable now: the model runs **no ads**. Kept for the deferred plan
+(`LEGAL-AUDIT-LEADGEN-OLD.md` R25–R27). Display ads on the site (AdSense) are a
+later option; "Paraguay available" was seen in a search snippet, and publisher
+restrictions on insurance content are unverified.
 
-1. Official article numbers of Ley 827/96: the definitions article (not
-   69); the sanctions range beyond Arts. 109, 121 and 122.
-2. The scope of **Res. SS.SG. 102/08**, and whether it reaches advertising
-   or promotion by a non-licensed marketing company acting for a corredor.
-3. Any SIS rule on comparators, lead generation or insurance advertising
-   beyond Art. 129.
-4. Res. 031/2026: the non-resident bar in the primary text.
-5. Ley 7593/2025: article numbers; reglamento status; DPO/registration
-   duties; the rule for international transfers to VenderCRM/Hostinger.
-6. Ley 4868/2013: whether provider identification is Art. 7 or Art. 28;
-   whether it applies to a site with no consumer sale.
-7. Ley 5830: whether a user-initiated contact request overrides a number
-   being on the No Molestar register.
-8. Whether per-converted-lead fixed fees count as commission (Art. 82).
-9. Whether "asistencia al viajero" is an SIS-regulated insurance product;
-   whether prepagas fall under another regulator (the Superintendencia de
-   Salud is our assumption, not seen in any source).
-10. INR rate and base; IVA treatment of insurance operations versus
-    marketing fees.
-11. Whether Paraguay is on Google's financial-services verification list;
-    whether Google allows health-insurance ads in Paraguay; Meta's
-    regulator-authorisation list.
-12. The whole of §1: the live-site findings are pending a network-enabled run.
+## 5. Unverified: ask the lawyer
+
+1. Does neutral information, an alphabetical directory with links, or an
+   illustrative premium example count as "promoción" or "oferta" under Res.
+   SS.SG. 102/08, or as misleading information under Ley 827/96 Art. 129?
+2. The exact article numbers and wording of Ley 827/96 Arts. 70, 76, 82, 129 and
+   the defining article.
+3. The Ley 5016 Art. 95 / Ley 5150 inconsistency on the SOAT, and whether the SOA
+   bill has advanced since the sources seen.
+4. Whether Carta Verde is legally required (Res. SS.RG. 2/99 content).
+5. Regulatory status of travel assistance, pet insurance, credit life.
+6. Ley 7593: article numbers, legal basis for a business contact form, retention
+   period, international transfer to VenderCRM and the e-mail provider, any rule
+   before Nov 2027.
+7. Ley 4868: Art. 7 or 28, and whether an informational site is in scope.
+8. Whether SEDECO has specific rules or actions on insurance advertising.
+9. Exact title and URL of the SIS public register of agents and corredores.
+10. Tax treatment of any later revenue (AdSense, sponsorship, affiliate, listing
+    fees) and whether an EAS can use IRE SIMPLE.
+11. Trademark: nominative use of insurer names in text.
+12. The whole of §1: live-site findings pending a network-enabled run.
+
+## 6. Local scan script (produces the real per-URL table)
+
+`tools/legal-audit.mjs` (Node 18+, no dependencies, read-only). It fetches every
+URL in the sitemap and, per element, flags: advice and recommendation wording,
+"we sell / we quote" wording, promise and ease words, prices, rankings, urgency,
+fear copy, insurer names (and endorsement words next to them), insurer logos,
+insurance-type JSON-LD, forms outside `/contacto`, pre-ticked or consumer fields
+in the contact form, WhatsApp links, calculators without the "Resultado
+ilustrativo" disclaimer, and analytics tags (to confirm consent gating). A second
+table shows, per page, whether the top strip, footer text, "no es asesoramiento",
+privacy, cookies, terms and methodology links, and the guide end note are
+present.
+
+```
+node tools/legal-audit.mjs https://seguro.com.py/sitemap.xml > scan.md
+```
+
+Tested only against a local sample site (four pages with known violations); it
+has never run against the real site. Regex matches are leads for a person to
+review. Calculators, tables and images still need a manual read. Paste the rows
+into §1, mark each page keep / rewrite / redirect (Phase 0), and re-send this
+file to the lawyer.
