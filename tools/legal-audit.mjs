@@ -21,7 +21,7 @@ const RULES = [
   { id: 'best', risk: 'high', re: /\b(el|la|los|las) mejor(es)? (seguro|aseguradora|cobertura|opcion|plan|prepaga|poliza|precio|corredor)s?\b/, fix: 'Remove the superlative. "Información para entender y comparar coberturas."' },
   { id: 'advice', risk: 'high', re: /\b(te |le )?(recomendamos|aconsejamos|asesoramos|sugerimos)\b|\bnuestra recomendacion\b|\bnuestros? (expertos?|asesores?)\b|\basesoramiento (gratis|gratuito|personal)/, fix: '"Información general, no es asesoramiento. Un corredor registrado puede asesorarte."' },
   { id: 'personalized', risk: 'high', re: /\b(ideal|perfecto|justo|indicado) para (vos|ti|usted|tu familia)\b|\b(elegimos|encontramos|buscamos) (por vos|el seguro|tu seguro)\b|\bel que (mas )?te conviene\b|\ba tu medida\b/, fix: '"Qué mirar al elegir un seguro de auto" (a checklist, not a pick).' },
-  { id: 'we-sell', risk: 'high', re: /\bte aseguramos\b|\bnuestras? (polizas?|seguros?|coberturas?|planes?)\b|\bcontrata(lo|la)? (ya|ahora|aqui|aca|online|en linea|hoy)\b|\bcontrata tu\b|\bcompra (tu|el) seguro\b|\bemit(imos|e) (tu |la |su )?poliza\b|\btu poliza en (minutos|el dia|\d+)\b|\bte cotizamos\b|\bcotizamos\b|\bcotiza ya\b|\bcotiza (gratis|ahora|en \d)|\bobtene tu cotizacion\b|\bcotizacion (oficial|exacta|final|vinculante)\b|\bgestionamos (tu|el) (siniestro|reclamo|seguro)\b/, fix: 'Remove. We do not sell, quote or manage claims. "Qué cubre, qué no cubre y cómo reclamar."' },
+  { id: 'we-sell', risk: 'high', re: /\bte aseguramos\b|\bnuestras? (polizas?|seguros?|coberturas?|planes?)\b|\bcontrata(lo|la)? (ya|ahora|aqui|aca|online|en linea|hoy)\b|\bcontrata tu\b|\bcompra (tu|el) seguro\b|\bemitimos (tu |la |su )?poliza\b|\btu poliza en (minutos|el dia|\d+)\b|\bte cotizamos\b|\bcotizamos\b|\bcotiza ya\b|\bcotiza (gratis|ahora|en \d)|\bobtene tu cotizacion\b|\bcotizacion (oficial|exacta|final|vinculante)\b|\bgestionamos (tu|el) (siniestro|reclamo|seguro)\b/, fix: 'Remove. We do not sell, quote or manage claims. "Qué cubre, qué no cubre y cómo reclamar."' },
   { id: 'promise', risk: 'high', re: /\bgarantiz(a|amos|ado|ada|ados|adas)\b|\bcobertura (total|completa)\b|\bcubre todo\b|\b100 ?% cubierto\b|\bsin letra chica\b|\baprobacion (segura|inmediata)\b|\bsin requisitos\b|\baprobad[oa]s?\b/, fix: '"Las coberturas, exclusiones y condiciones las define cada aseguradora en su póliza."' },
   { id: 'ease', risk: 'high', re: /\b(facil|facilisimo|rapido|rapida|al instante|instantane[oa]|en minutos|en segundos|en 2 minutos|en 3 minutos|sin vueltas|sin tramites|sin papeleo)\b/, fix: 'Remove ease/speed promises. Describe the process neutrally.' },
   { id: 'price', risk: 'high', re: /(₲|\bgs\.?|\bpyg|\bus\$|\busd)\s?[\d.,]{3,}|\bdesde\s+(₲|gs|us\$|usd)|\bprima (de|desde|mensual)\b|\b\d[\d.,]*\s?(por mes|\/mes|mensuales)\b/, fix: 'Delete the figure unless it has an insurer source and a date: "Ejemplo ilustrativo tomado de [fuente, fecha]. No es una cotización."' },
@@ -113,7 +113,12 @@ function audit(url, html) {
   for (const [el, text] of blocks(html)) {
     for (const s of el === 'json-ld' ? [text] : sentences(text)) {
       const n = norm(s);
-      for (const r of RULES) if (r.re.test(n)) add(el, s.slice(0, 300), r.id, r.risk, r.fix);
+      // Sentences that say what we do NOT do (the disclaimers) may contain the flagged verbs.
+      const negated = /\bno (vendemos|cotizamos|asesoramos|recomendamos|gestionamos|somos|ofrecemos|brindamos|hacemos|recibimos|tramitamos)\b/.test(n);
+      for (const r of RULES) {
+        if (negated && (r.id === 'we-sell' || r.id === 'advice' || r.id === 'cta-sell')) continue;
+        if (r.re.test(n)) add(el, s.slice(0, 300), r.id, r.risk, r.fix);
+      }
       const named = INSURERS.filter((i) => new RegExp(`\\b${i}\\b`).test(n));
       if (named.length) {
         const endorsed = ENDORSE.test(n);
@@ -166,7 +171,10 @@ function audit(url, html) {
 const RISK_ORDER = { high: 0, medium: 1, low: 2 };
 
 async function main() {
-  const urls = [...new Set(await sitemapUrls(SITEMAP))];
+  let urls = [...new Set(await sitemapUrls(SITEMAP))];
+  // Testing a local build: the sitemap lists https://seguro.com.py/… but we fetch from the local server.
+  const base = new URL(SITEMAP);
+  if (/^(localhost|127\.0\.0\.1)$/.test(base.hostname)) urls = urls.map((u) => base.origin + new URL(u).pathname);
   const results = [];
   for (const url of urls) {
     try {

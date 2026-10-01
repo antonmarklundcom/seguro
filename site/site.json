@@ -1,0 +1,29 @@
+{
+  "name": "seguro.com.py",
+  "origin": "https://seguro.com.py",
+  "lang": "es-PY",
+  "updated": "2026-10-01",
+  "contactEmail": "contacto@seguro.com.py",
+  "privacyEmail": "datos@seguro.com.py",
+  "company": {
+    "razonSocial": null,
+    "ruc": null,
+    "domicilio": null
+  },
+  "topStrip": "Sitio informativo. No vendemos seguros ni somos una aseguradora.",
+  "footer": "Sitio informativo. seguro.com.py no es una aseguradora, un corredor ni un agente de seguros. No vendemos, cotizamos ni contratamos seguros, no recibimos solicitudes de seguro, no gestionamos siniestros y no manejamos dinero. La información es general y no es asesoramiento. Verificá siempre las condiciones, coberturas y exclusiones directamente con la aseguradora.",
+  "guideEndNote": "Esta guía es informativa y no reemplaza el asesoramiento de un profesional.",
+  "nav": [
+    { "href": "/guias/", "label": "Guías" },
+    { "href": "/glosario/", "label": "Glosario" },
+    { "href": "/metodologia/", "label": "Metodología" },
+    { "href": "/contacto/", "label": "Contacto" }
+  ],
+  "footerLinks": [
+    { "href": "/quienes-somos/", "label": "Quiénes somos" },
+    { "href": "/metodologia/", "label": "Metodología" },
+    { "href": "/politica-de-privacidad/", "label": "Privacidad" },
+    { "href": "/politica-de-cookies/", "label": "Cookies" },
+    { "href": "/terminos/", "label": "Términos" }
+  ]
+}

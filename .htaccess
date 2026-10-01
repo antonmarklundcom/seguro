@@ -1,0 +1,35 @@
+# seguro.com.py — static site served from the repo root (Hostinger Git deploy).
+# This file keeps repo internals (docs, tools, build sources, git data) out of the web.
+
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# HTTPS only
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Never serve repository internals
+RewriteRule ^(docs|site|tools|\.git|storage)(/|$) - [R=404,L]
+RewriteRule ^(README|PLAN|CLAUDE)\.md$ - [R=404,L]
+RewriteRule (^|/)\.(git|env|htaccess)|\.(md|mjs|json|log|sh|php)$ - [R=404,L]
+
+# Add known old URLs here as: Redirect 301 /old-path/ /guias/new-path/
+</IfModule>
+
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+</IfModule>
+
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType text/css "access plus 1 week"
+ExpiresByType text/html "access plus 10 minutes"
+</IfModule>
