@@ -11,6 +11,7 @@
     "build": "node engine/build-site.mjs --site=seguro",
     "verify": "node engine/verify.mjs --site=seguro",
     "serve": "node engine/serve.mjs --site=seguro --port=8080",
+    "publish": "npm run build && npm run verify && node deploy/sync-root.mjs",
     "test:form": "node tools/test-form.mjs",
     "zip": "powershell -File deploy/make-zip.ps1",
     "release": "npm run build && npm run verify && npm run zip"

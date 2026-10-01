@@ -1,0 +1,90 @@
+# seguro.com.py — hardening and canonical host.
+# Output-only packaging is the primary protection; these rules are defence in depth.
+
+ErrorDocument 404 /404.html
+DirectoryIndex index.html index.php
+
+Options -Indexes
+
+RewriteEngine On
+
+# www -> bare domain, HTTPS.
+RewriteCond %{HTTP_HOST} ^www\.seguro\.com\.py$ [NC]
+RewriteRule ^(.*)$ https://seguro.com.py/$1 [L,R=301]
+
+# Never serve dotfiles or version-control / tool directories.
+RedirectMatch 404 ^/\.git(/|$)
+RedirectMatch 404 ^/\.github(/|$)
+RedirectMatch 404 ^/\.claude(/|$)
+RedirectMatch 404 ^/\.codex(/|$)
+RedirectMatch 404 ^/\.agents(/|$)
+RedirectMatch 404 ^/\.gitignore$
+RedirectMatch 404 ^/\.htaccess$
+RedirectMatch 404 ^/\.env(\..*)?$
+
+# Keep hosting verification working.
+RewriteRule ^\.well-known/ - [L]
+
+# Repository sources, docs and tooling are not part of the public site.
+RedirectMatch 404 ^/engine(/|$)
+RedirectMatch 404 ^/sites(/|$)
+RedirectMatch 404 ^/deploy(/|$)
+RedirectMatch 404 ^/tools(/|$)
+RedirectMatch 404 ^/audit(/|$)
+RedirectMatch 404 ^/.deployed-files$
+RedirectMatch 404 ^/docs(/|$)
+RedirectMatch 404 ^/prompts(/|$)
+RedirectMatch 404 ^/research(/|$)
+RedirectMatch 404 ^/tests(/|$)
+RedirectMatch 404 ^/scripts(/|$)
+RedirectMatch 404 ^/node_modules(/|$)
+RedirectMatch 404 ^/package(-lock)?\.json$
+RedirectMatch 404 ^/.*\.(mjs|md|log|bak|sql|zip)$
+RedirectMatch 404 ^/redirects\.txt$
+
+# Contact form: only the handler and the form page may run PHP. config.php (uploaded by hand),
+# its example, the helper library and the rate-limit storage are never reachable from the web.
+RedirectMatch 404 ^/storage(/|$)
+RedirectMatch 404 ^/config(\.example)?\.php$
+RedirectMatch 404 ^/contacto-lib\.php$
+RewriteCond %{REQUEST_URI} !^/contacto-alianzas\.php$
+RewriteCond %{REQUEST_URI} !^/contacto/mensaje/(index\.php)?$
+RewriteRule \.php$ - [R=404,L]
+
+# Permanent redirects (from redirects.txt). Removed pages go to the closest safe page, never to a 404.
+RedirectMatch 301 ^/aseguradoras/aseguradora-del-este/?$ /aseguradoras/
+RedirectMatch 301 ^/aseguradoras/tajy/?$ /aseguradoras/
+RedirectMatch 301 ^/aseguradoras/la-consolidada/?$ /aseguradoras/
+RedirectMatch 301 ^/aseguradoras/sancor/?$ /aseguradoras/
+RedirectMatch 301 ^/aseguradoras/mapfre/?$ /aseguradoras/
+RedirectMatch 301 ^/aseguradoras/patria/?$ /aseguradoras/
+RedirectMatch 301 ^/aseguradoras/aseguradora-yacyreta/?$ /aseguradoras/
+RedirectMatch 301 ^/aseguradoras/el-comercio-paraguayo/?$ /aseguradoras/
+RedirectMatch 301 ^/salud/migone/?$ /salud/
+RedirectMatch 301 ^/salud/asismed/?$ /salud/
+RedirectMatch 301 ^/salud/santa-clara/?$ /salud/
+RedirectMatch 301 ^/calculadoras/deducible/?$ /guias/como-funciona-la-franquicia-o-deducible/
+RedirectMatch 301 ^/blog/salud/como-comparar-asismed-santa-clara/?$ /blog/salud/como-elegir-medicina-prepaga/
+RedirectMatch 301 ^/blog/salud/que-cubre-un-plan-migone/?$ /blog/salud/como-elegir-medicina-prepaga/
+RedirectMatch 301 ^/blog/viajes/que-cubre-asistencia-tarjeta-itau/?$ /asistencia-al-viajero/tarjetas-de-credito/
+
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  <FilesMatch "\.php$">
+    Header set Cache-Control "no-store"
+  </FilesMatch>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Short revalidation for HTML; assets are content-hash versioned by the build.
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=300, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=600, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(woff2|avif|webp|jpg|png|svg)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>

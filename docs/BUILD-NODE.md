@@ -7,7 +7,8 @@ Output goes to `dist/seguro.com.py/` (git-ignored). Contact form: `engine/php/` 
 npm run build        # dist/seguro.com.py
 npm run verify       # structural + legal-wording gate, must end PASS
 npm run test:form    # end-to-end form tests (needs php with curl; set PHP_BIN if not on PATH)
-npm run zip          # package for upload, or: node deploy/make-deploy-branch.mjs (hPanel → Git)
+npm run publish      # build + verify + copy the site to the repo root (hPanel Git deploys main)
+npm run zip          # alternative: package for upload
 ```
 
 Redirects live in `redirects.txt` and are generated into `.htaccess`. `config.php` (VenderCRM key, notification address) is

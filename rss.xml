@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Seguro.com.py — guías sobre seguros en Paraguay</title>
+    <link>https://seguro.com.py/blog/</link>
+    <atom:link href="https://seguro.com.py/rss.xml" rel="self" type="application/rss+xml" />
+    <description>Artículos educativos sobre seguros de auto, medicina prepaga y asistencia al viajero en Paraguay.</description>
+    <language>es-PY</language>
+    <lastBuildDate>Mon, 14 Sep 2026 12:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Cómo elegir una franquicia de auto: preguntas para el proveedor</title>
+      <link>https://seguro.com.py/blog/autos/como-elegir-franquicia/</link>
+      <guid isPermaLink="true">https://seguro.com.py/blog/autos/como-elegir-franquicia/</guid>
+      <pubDate>Mon, 14 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Autos</category>
+      <description>Elegir la franquicia de un seguro todo riesgo suele reducirse a una sola pregunta mal planteada: &quot;¿cuál cuesta menos?&quot;. La pregunta correcta es otra: ¿cuánto podrías afrontar de tu bolsillo si tenés un siniestro mañana?</description>
+    </item>
+    <item>
+      <title>Cómo elegir un seguro para motos: coberturas que conviene revisar</title>
+      <link>https://seguro.com.py/blog/autos/como-elegir-seguro-para-motos/</link>
+      <guid isPermaLink="true">https://seguro.com.py/blog/autos/como-elegir-seguro-para-motos/</guid>
+      <pubDate>Mon, 14 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Autos</category>
+      <description>Las motos tienen un perfil de riesgo distinto al de los autos, y eso se refleja en condiciones particulares propias dentro de cada póliza. Antes de comparar precios, conviene tener claro qué mirar.</description>
+    </item>
+    <item>
+      <title>Qué cubre el seguro contra terceros: ejemplos para leer la póliza</title>
+      <link>https://seguro.com.py/blog/autos/que-cubre-contra-terceros-ejemplos/</link>
+      <guid isPermaLink="true">https://seguro.com.py/blog/autos/que-cubre-contra-terceros-ejemplos/</guid>
+      <pubDate>Mon, 14 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Autos</category>
+      <description>El nombre del seguro contra terceros genera confusión: mucha gente cree que &quot;contra terceros&quot; significa &quot;cualquier daño a otro&quot;, sin mirar los límites reales de la póliza.</description>
+    </item>
+    <item>
+      <title>Qué pasa si chocás y no tenés seguro: primeros pasos de consulta</title>
+      <link>https://seguro.com.py/blog/autos/que-pasa-si-choco-primeros-pasos/</link>
+      <guid isPermaLink="true">https://seguro.com.py/blog/autos/que-pasa-si-choco-primeros-pasos/</guid>
+      <pubDate>Mon, 14 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Autos</category>
+      <description>Un choque sin seguro cambia por completo el panorama frente a un choque con cobertura vigente: no hay una compañía que responda por los daños, y la conversación sobre quién paga qué queda directamente entre las partes involucradas.</description>
+    </item>
+    <item>
+      <title>Cómo elegir asistencia al viajero: límites y condiciones a revisar</title>
+      <link>https://seguro.com.py/blog/viajes/como-elegir-asistencia-al-viajero/</link>
+      <guid isPermaLink="true">https://seguro.com.py/blog/viajes/como-elegir-asistencia-al-viajero/</guid>
+      <pubDate>Mon, 14 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Viajes</category>
+      <description>Elegir asistencia al viajero se complica porque el mercado ofrece productos con nombres parecidos y alcances distintos: un beneficio de tarjeta de crédito, un servicio contratado por un plazo fijo de viaje, o un producto con respaldo asegurador detrás. Comparar precio sin…</description>
+    </item>
+    <item>
+      <title>Cuánto cuesta un seguro de auto: qué datos pedir para comparar</title>
+      <link>https://seguro.com.py/blog/autos/cuanto-cuesta-y-que-datos-pedir/</link>
+      <guid isPermaLink="true">https://seguro.com.py/blog/autos/cuanto-cuesta-y-que-datos-pedir/</guid>
+      <pubDate>Sun, 13 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Autos</category>
+      <description>Cuando pedís precios para un seguro de auto, es habitual recibir tres números muy distintos y no saber cuál conviene. Casi siempre no es porque una compañía sea cara y otra barata: es porque las tres están cotizando coberturas diferentes.</description>
+    </item>
+    <item>
+      <title>Cómo elegir medicina prepaga: sanatorios, consultas y copagos</title>
+      <link>https://seguro.com.py/blog/salud/como-elegir-medicina-prepaga/</link>
+      <guid isPermaLink="true">https://seguro.com.py/blog/salud/como-elegir-medicina-prepaga/</guid>
+      <pubDate>Sun, 13 Sep 2026 12:00:00 GMT</pubDate>
+      <category>Salud</category>
+      <description>Elegir un plan de medicina prepaga se parece poco a elegir un seguro. No hay una suma asegurada que comparar: lo que define el plan es dónde te podés atender, qué prestaciones entran y cuánto pagás cada vez que lo usás.</description>
+    </item>
+  </channel>
+</rss>

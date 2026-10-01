@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://seguro.com.py/sitemap.xml
