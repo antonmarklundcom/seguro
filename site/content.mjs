@@ -202,48 +202,77 @@ export const pages = {
 <h2>Cómo nos financiamos</h2>
 <p>Hoy no recibimos dinero de aseguradoras, corredores ni anunciantes, y no tenemos relación comercial con ninguno. Si eso cambia, lo vamos a decir en cada página afectada.</p>
 <h2>Contacto</h2>
-<p>Para corregir un dato o hacer una consulta sobre el sitio: <a href="mailto:__EMAIL__">__EMAIL__</a>.</p>
+<p>Para corregir un dato o hacer una consulta sobre el sitio, usá el <a href="/contacto/">formulario de contacto</a>.</p>
 __COMPANY__`,
   },
   contacto: {
     slug: 'contacto',
     title: 'Contacto',
-    description: 'Cómo escribirnos para corregir un dato o consultar sobre el sitio.',
+    description: 'Cómo comunicarte con seguro.com.py: correcciones, pedidos sobre tus datos y mensajes de aseguradoras, corredores, medios y agencias.',
     body: `
-<p><strong>Este contacto es solo para corregir información del sitio y para aseguradoras, corredores, medios o socios comerciales.</strong> No tramitamos pedidos de seguro ni recibimos datos de personas que buscan un seguro.</p>
-<p>Si buscás un seguro, leé nuestras <a href="/guias/">guías</a> y verificá siempre que la aseguradora o el corredor estén registrados (<a href="/guias/como-verificar-una-aseguradora-o-corredor/">cómo hacerlo</a>).</p>
-<h2>Escribinos</h2>
-<p>Correo: <a href="mailto:__EMAIL__">__EMAIL__</a></p>
-<p>Por favor, no incluyas datos personales sensibles (salud, cédula, datos de tu póliza). Usamos tu mensaje solo para responderte; mirá la <a href="/politica-de-privacidad/">política de privacidad</a>.</p>`,
+<p><strong>Este contacto es solo para corregir información del sitio, hacer pedidos sobre tus datos personales y para aseguradoras, corredores, medios, agencias y socios comerciales.</strong> No tramitamos pedidos de seguro ni recibimos datos de personas que buscan un seguro.</p>
+<h2>Elegí una opción</h2>
+<ul class="choices">
+  <li><a href="/contacto/busco-un-seguro/">Estoy buscando un seguro</a></li>
+  <li><a href="/contacto/mensaje/">Quiero corregir un dato del sitio, hacer un pedido sobre mis datos, o soy aseguradora, corredor, medio, agencia u otro</a></li>
+</ul>`,
+  },
+  buscoSeguro: {
+    slug: 'contacto/busco-un-seguro',
+    title: 'Estoy buscando un seguro',
+    description: 'Este sitio no tramita pedidos de seguro. Qué leer y cómo verificar a quien te ofrece uno.',
+    body: `
+<p><strong>Este sitio es informativo y no tramita pedidos de seguro.</strong> No te pedimos tus datos y no los enviamos a nadie.</p>
+<p>Para entender tus opciones, leé nuestras guías, y verificá siempre que la aseguradora o el corredor estén registrados en la Superintendencia de Seguros.</p>
+<ul>
+  <li><a href="/guias/como-leer-una-poliza/">Cómo leer una póliza</a></li>
+  <li><a href="/guias/como-verificar-una-aseguradora-o-corredor/">Cómo verificar una aseguradora o un corredor</a></li>
+  <li><a href="/guias/como-hacer-un-reclamo/">Cómo hacer un reclamo</a></li>
+  <li><a href="/guias/">Todas las guías</a></li>
+</ul>`,
+  },
+  gracias: {
+    slug: 'contacto/gracias',
+    title: 'Mensaje recibido',
+    description: 'Recibimos tu mensaje.',
+    body: `
+<p><strong>Recibimos tu mensaje.</strong> Si corresponde, te vamos a responder usando los datos que dejaste.</p>
+<p>Recordá: este sitio no vende ni tramita seguros. Para entender tus opciones, leé las <a href="/guias/">guías</a>.</p>`,
   },
   privacidad: {
     slug: 'politica-de-privacidad',
     title: 'Política de privacidad',
-    description: 'Qué datos trata este sitio y cómo pedir que los borremos.',
+    description: 'Qué datos trata este sitio, para qué, quién los ve y cómo pedir que los borremos.',
     body: `
 <p><em>Versión 1.0, 1 de octubre de 2026.</em></p>
 <h2>Resumen</h2>
 <ul>
-  <li>Este sitio <strong>no tiene formularios</strong> ni te pide datos personales.</li>
+  <li>Este sitio <strong>no te pide datos para un seguro</strong> y no tiene formularios de cotización ni de solicitud.</li>
+  <li>Hay <strong>un solo formulario de contacto</strong>: para corregir un dato del sitio, hacer un pedido sobre tus datos personales y mensajes de aseguradoras, corredores, medios y agencias.</li>
   <li>No usamos cookies ni herramientas de análisis (ver <a href="/politica-de-cookies/">cookies</a>).</li>
-  <li>Si nos escribís por correo, usamos tu mensaje solo para responderte.</li>
-  <li>No vendemos ni compartimos datos con aseguradoras, corredores ni bancos.</li>
+  <li>No vendemos ni compartimos tus datos con aseguradoras, corredores ni bancos.</li>
 </ul>
 <h2>Quién responde por los datos</h2>
-<p>El titular de seguro.com.py. Contacto: <a href="mailto:__PRIVACY__">__PRIVACY__</a>.</p>
-<h2>Qué datos pueden tratarse</h2>
+<p>El titular de seguro.com.py (sus datos figuran en <a href="/quienes-somos/">Quiénes somos</a> cuando estén confirmados). Para cualquier pedido sobre tus datos usá el <a href="/contacto/mensaje/">formulario de contacto</a>, tipo "Pedido sobre mis datos personales".</p>
+<h2>Datos del formulario de contacto</h2>
 <ul>
-  <li><strong>Registros del servidor.</strong> El servicio de alojamiento puede registrar datos técnicos de cada visita (por ejemplo, dirección IP, fecha y página consultada) para seguridad y funcionamiento. Nosotros no los usamos para identificarte.</li>
-  <li><strong>Correos que nos enviás.</strong> Tu nombre, tu dirección de correo y lo que escribas. Los usamos solo para responderte y los guardamos mientras sea necesario para eso. Podés pedir que los borremos.</li>
+  <li><strong>Qué:</strong> tipo de consulta, nombre y apellido, organización (si corresponde), cargo (opcional), teléfono o WhatsApp, correo electrónico y tu mensaje; además la fecha, la hora y la versión del texto de consentimiento que aceptaste.</li>
+  <li><strong>Para qué:</strong> solo para responder a tu mensaje y, si sos una empresa o un medio, gestionar la relación comercial que surja.</li>
+  <li><strong>Base:</strong> tu consentimiento, que das tildando la casilla antes de enviar.</li>
+  <li><strong>Quién los ve:</strong> el titular del sitio y dos proveedores: un sistema de gestión de contactos (VenderCRM) y el proveedor de correo electrónico. Ambos pueden estar fuera de Paraguay.</li>
+  <li><strong>Cuánto tiempo:</strong> hasta responderte y mientras dure la relación; después, hasta 24 meses (plazo propuesto, a confirmar). Los mensajes sin relación comercial se borran antes.</li>
 </ul>
-<h2>Proveedores</h2>
-<p>El sitio se aloja en un servicio de hosting y el correo pasa por un proveedor de correo electrónico; ambos pueden estar fuera de Paraguay.</p>
+<h2>Otros datos técnicos</h2>
+<ul>
+  <li><strong>Registros del servidor.</strong> El servicio de alojamiento puede registrar datos técnicos de cada visita (por ejemplo, dirección IP, fecha y página) para seguridad y funcionamiento.</li>
+  <li><strong>Límite de envíos.</strong> Para frenar el spam guardamos por una hora una huella cifrada (no la dirección en claro) de quien envía el formulario.</li>
+</ul>
 <h2>Tus derechos</h2>
-<p>Podés pedir acceso, corrección o eliminación de tus datos, o retirar tu consentimiento, escribiendo a <a href="mailto:__PRIVACY__">__PRIVACY__</a>. Respondemos en un plazo razonable.</p>
+<p>Podés pedir acceso, corrección o eliminación de tus datos, oponerte a su uso o retirar tu consentimiento en cualquier momento, usando el <a href="/contacto/mensaje/">formulario</a> (tipo "Pedido sobre mis datos personales"). Respondemos en un plazo razonable, que apuntamos a que no supere los 30 días.</p>
 <h2>No nos envíes datos sensibles</h2>
-<p>No incluyas datos de salud, cédula ni datos de tu póliza. Si los recibimos, los borramos.</p>
+<p>No incluyas datos de salud, cédula, datos de tu póliza ni datos de otras personas. Si los recibimos, los borramos. Si buscás un seguro, este formulario no es para vos: mirá <a href="/contacto/busco-un-seguro/">qué hacer</a>.</p>
 <h2>Cambios</h2>
-<p>Si el sitio empieza a recoger datos, actualizaremos esta política antes y pediremos tu consentimiento donde corresponda.</p>`,
+<p>Si el sitio empieza a tratar otros datos, actualizaremos esta política antes y pediremos tu consentimiento donde corresponda.</p>`,
   },
   cookies: {
     slug: 'politica-de-cookies',
@@ -265,7 +294,7 @@ __COMPANY__`,
 <h2>Verificá siempre</h2>
 <p>Las condiciones, coberturas y exclusiones las define cada póliza. Antes de decidir, verificá la información directamente con la aseguradora y con un corredor o agente registrado.</p>
 <h2>Exactitud</h2>
-<p>Revisamos el contenido y mostramos la fecha de actualización y las fuentes. Aun así puede haber errores o cambios en la ley. Si encontrás uno, escribinos a <a href="mailto:__EMAIL__">__EMAIL__</a>.</p>
+<p>Revisamos el contenido y mostramos la fecha de actualización y las fuentes. Aun así puede haber errores o cambios en la ley. Si encontrás uno, avisanos con el <a href="/contacto/mensaje/">formulario de contacto</a>.</p>
 <h2>Enlaces</h2>
 <p>El sitio puede enlazar a páginas de terceros (por ejemplo, el Banco Central del Paraguay). No controlamos esas páginas ni respondemos por su contenido.</p>
 <h2>Contenido</h2>
@@ -285,7 +314,7 @@ __COMPANY__`,
 <h2>Actualización</h2>
 <p>Cada guía muestra su fecha de actualización. Revisamos las páginas que citan normas o trámites cuando cambia la norma y, como mínimo, una vez por trimestre.</p>
 <h2>Correcciones</h2>
-<p>Si algo es incorrecto, escribinos a <a href="mailto:__EMAIL__">__EMAIL__</a>. Corregimos y dejamos la fecha de la corrección.</p>
+<p>Si algo es incorrecto, avisanos con el <a href="/contacto/mensaje/">formulario de contacto</a>. Corregimos y dejamos la fecha de la corrección.</p>
 <h2>Independencia</h2>
 <p>Hoy no recibimos dinero de aseguradoras, corredores ni anunciantes. Si eso cambia, lo indicaremos en cada página afectada.</p>
 <h2>Límites</h2>

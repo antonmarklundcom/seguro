@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync, rmSyn
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { guides, glossary, pages } from './content.mjs';
+import { formBody } from './form.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const site = JSON.parse(readFileSync(join(ROOT, 'site/site.json'), 'utf8'));
@@ -24,7 +25,7 @@ const companyHtml = c.razonSocial && c.ruc && c.domicilio
   ? `<h2>Datos del titular</h2><p>${esc(c.razonSocial)} · RUC ${esc(c.ruc)} · ${esc(c.domicilio)}</p>`
   : '';
 const companyLine = c.razonSocial && c.ruc && c.domicilio ? `<p>${esc(c.razonSocial)} · RUC ${esc(c.ruc)} · ${esc(c.domicilio)}</p>\n` : '';
-const fill = (html) => html.replaceAll('__EMAIL__', site.contactEmail).replaceAll('__PRIVACY__', site.privacyEmail).replaceAll('__COMPANY__', companyHtml);
+const fill = (html) => html.replaceAll('__COMPANY__', companyHtml);
 
 // ---- layout ----
 function layout({ path, title, description, body, jsonld = null, noindex = false, home = false }) {
@@ -64,7 +65,7 @@ ${body}
 <footer class="site-footer">
 <div class="wrap">
 <p>${esc(site.footer)}</p>
-${companyLine}<p>Contacto: <a href="mailto:${site.contactEmail}">${site.contactEmail}</a></p>
+${companyLine}
 <p>${flinks}</p>
 <p class="small">Última revisión del sitio: ${fmtDate(site.updated)}.</p>
 </div>
@@ -94,7 +95,7 @@ ${g.body}
 <aside class="todo"><h2>Qué hacer ahora</h2><ul>${g.todo}</ul></aside>
 <section class="sources"><h2>Fuentes</h2><ul>${src}</ul></section>
 <section><h2>Guías relacionadas</h2><ul>${rel}</ul></section>
-<p class="endnote">${esc(site.guideEndNote)} Actualizada el ${fmtDate(site.updated)}. ¿Encontraste un error? Escribinos a <a href="mailto:${site.contactEmail}">${site.contactEmail}</a>.</p>
+<p class="endnote">${esc(site.guideEndNote)} Actualizada el ${fmtDate(site.updated)}. ¿Encontraste un error? Avisanos con el <a href="/contacto/mensaje/">formulario de contacto</a>.</p>
 </article>`;
   const jsonld = { '@context': 'https://schema.org', '@type': 'Article', headline: g.title, description: g.description, inLanguage: site.lang, dateModified: site.updated, datePublished: site.updated, author: { '@type': 'Organization', name: site.name }, publisher: { '@type': 'Organization', name: site.name }, mainEntityOfPage: site.origin + path };
   add(dirPath(path), layout({ path, title: g.title, description: g.description, body, jsonld }));
@@ -115,10 +116,18 @@ ${g.body}
 }
 
 // ---- trust pages ----
-for (const key of ['quienes', 'contacto', 'privacidad', 'cookies', 'terminos', 'metodologia']) {
+for (const key of ['quienes', 'contacto', 'buscoSeguro', 'privacidad', 'cookies', 'terminos', 'metodologia', 'gracias']) {
   const p = pages[key];
   const path = `/${p.slug}/`;
-  add(dirPath(path), layout({ path, title: p.title, description: p.description, body: `<h1>${esc(p.title)}</h1>${fill(p.body)}` }));
+  add(dirPath(path), layout({ path, title: p.title, description: p.description, noindex: key === 'gracias', body: `<h1>${esc(p.title)}</h1>${fill(p.body)}` }));
+}
+
+// ---- contact form page (PHP: signed timestamp, error messages). The only form on the site. ----
+const holder = { text: c.razonSocial ? esc(c.razonSocial) : 'el titular de seguro.com.py' };
+{
+  const path = '/contacto/mensaje/';
+  const html = layout({ path, title: 'Escribinos', description: 'Formulario de contacto: correcciones, pedidos sobre tus datos y mensajes de aseguradoras, corredores, medios y agencias.', noindex: true, body: formBody({ holder, version: site.consentVersion }) });
+  add('contacto/mensaje/index.php', html);
 }
 
 // ---- home ----
@@ -150,16 +159,16 @@ for (const key of ['quienes', 'contacto', 'privacidad', 'cookies', 'terminos', '
 add('404.html', layout({ path: '/404.html', title: 'Página no encontrada', description: 'La página que buscás no existe.', noindex: true, body: `<h1>No encontramos esa página</h1><p>Puede haberse movido o no existir más. Probá con las <a href="/guias/">guías</a>, el <a href="/glosario/">glosario</a> o volvé al <a href="/">inicio</a>.</p>` }));
 
 // ---- robots + sitemap ----
-const urls = ['/', '/guias/', ...guides.map((g) => `/guias/${g.slug}/`), '/glosario/', ...['quienes', 'contacto', 'privacidad', 'cookies', 'terminos', 'metodologia'].map((k) => `/${pages[k].slug}/`)];
+const urls = ['/', '/guias/', ...guides.map((g) => `/guias/${g.slug}/`), '/glosario/', ...['quienes', 'contacto', 'buscoSeguro', 'privacidad', 'cookies', 'terminos', 'metodologia'].map((k) => `/${pages[k].slug}/`)];
 add('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `<url><loc>${site.origin}${u}</loc><lastmod>${site.updated}</lastmod></url>`).join('\n')}\n</urlset>\n`);
-add('robots.txt', `User-agent: *\nAllow: /\nDisallow: /docs/\nDisallow: /site/\nDisallow: /tools/\n\nSitemap: ${site.origin}/sitemap.xml\n`);
+add('robots.txt', `User-agent: *\nAllow: /\nDisallow: /docs/\nDisallow: /site/\nDisallow: /tools/\nDisallow: /contacto/mensaje/\nDisallow: /contacto-alianzas.php\n\nSitemap: ${site.origin}/sitemap.xml\n`);
 
 // ---- checks ----
 const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const BANNED = /\b(facil|facilisimo|rapido|rapida|al instante|instantane|garantiz|sin requisitos|aprobad|pre-?aprobad|el mejor|la mejor|los mejores|mas barat|te aseguramos|nuestras? polizas?|cotiza ya|cotizar|cotiza gratis|contrata ya|ultimos dias|solo por hoy|oferta|no esperes|top \d|ranking|ahorra)/;
 const problems = [];
 if (!site.topStrip || !site.footer || !site.guideEndNote) problems.push('site.json: a disclaimer text is empty');
-const known = new Set(['/', ...out.keys()].map((k) => (k === 'index.html' ? '/' : '/' + k.replace(/index\.html$/, ''))));
+const known = new Set(['/', ...out.keys()].map((k) => (k === 'index.html' ? '/' : '/' + k.replace(/index\.(html|php)$/, ''))));
 for (const [path, html] of out) {
   if (path.endsWith('.html')) {
     const text = norm(html.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<[^>]+>/g, ' '));
@@ -174,6 +183,19 @@ for (const [path, html] of out) {
     }
   }
 }
+for (const [path, content] of out) {
+  if (/mailto:|[a-z0-9._-]+@seguro\.com\.py/i.test(content)) problems.push(`${path}: e-mail address or mailto link on the site`);
+}
+{
+  const f = out.get('contacto/mensaje/index.php');
+  if ((f.match(/<form\b/g) || []).length !== 1 || !/action="\/contacto-alianzas\.php"/.test(f)) problems.push('form page: expected exactly one form posting to /contacto-alianzas.php');
+  if (/type="checkbox"[^>]*\bchecked\b/.test(f) || !/type="checkbox" name="consent" value="[^"]+" required/.test(f)) problems.push('form page: consent checkbox must be required and unticked');
+  const names = [...f.matchAll(/<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"/g)].map((m) => m[1]);
+  const allowed = new Set(['tipo', 'nombre', 'organizacion', 'cargo', 'telefono', 'email', 'mensaje', 'website', 't', 'consent']);
+  for (const n of names) if (!allowed.has(n)) problems.push(`form page: unexpected field "${n}"`);
+  for (const n of allowed) if (!names.includes(n)) problems.push(`form page: missing field "${n}"`);
+  if (/(cedula|c\.i\.|enfermedad|patente|chapa|chasis)/.test(norm(names.join(' ')))) problems.push('form page: consumer/health field name');
+}
 if (problems.length) { console.error('BUILD FAILED:\n- ' + problems.join('\n- ')); process.exit(1); }
 
 // ---- write (remove only what a previous build created) ----
@@ -182,5 +204,6 @@ if (existsSync(manifestPath)) for (const f of JSON.parse(readFileSync(manifestPa
 for (const [p, content] of out) { const file = join(ROOT, p); mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, content); }
 mkdirSync(join(ROOT, 'assets'), { recursive: true });
 copyFileSync(join(ROOT, 'site/style.css'), join(ROOT, 'assets/style.css'));
-writeFileSync(manifestPath, JSON.stringify([...out.keys(), 'assets/style.css'], null, 1));
+copyFileSync(join(ROOT, 'site/form.js'), join(ROOT, 'assets/form.js'));
+writeFileSync(manifestPath, JSON.stringify([...out.keys(), 'assets/style.css', 'assets/form.js'], null, 1));
 console.log(`Built ${out.size} files. ${urls.length} URLs in sitemap.`);

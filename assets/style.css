@@ -31,3 +31,19 @@ h2{font-size:1.35rem;line-height:1.3;margin:2rem 0 .5rem}
 .site-footer{border-top:1px solid var(--line);background:var(--box);padding:1.25rem 0 2rem}
 .site-footer p{margin:.5rem 0}
 @media (max-width:480px){body{font-size:17px}h1{font-size:1.6rem}}
+.choices{list-style:none;padding:0;display:grid;gap:.75rem}
+.choices a{display:block;background:var(--box);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:.9rem 1rem;font-weight:600}
+.box-note{background:var(--accent-bg);border:1px solid var(--line);border-radius:6px;padding:.8rem 1rem}
+.form label{display:block;font-weight:600;margin-bottom:.25rem}
+.form input[type=text],.form input[type=tel],.form input[type=email],.form select,.form textarea{width:100%;font:inherit;font-size:1rem;padding:.6rem .7rem;border:1px solid var(--line);border-radius:6px;background:var(--box);color:var(--fg)}
+.form .help{display:block;color:var(--muted);font-size:1rem;margin-top:.25rem}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.consent-box{background:var(--box);border:2px solid var(--accent);border-radius:8px;padding:.75rem 1.1rem 1rem;margin:1.5rem 0}
+.consent-box legend{font-weight:700;font-size:1.1rem;padding:0 .4rem}
+.consent-box ul{margin:.25rem 0 1rem;padding-left:1.2rem}
+.form label.consent{display:flex;gap:.6rem;align-items:flex-start;font-weight:400;font-size:1rem;cursor:pointer}
+.form label.consent input{width:1.4rem;height:1.4rem;margin-top:.2rem;flex:none}
+.error{color:#b00020;font-weight:600}
+@media (prefers-color-scheme:dark){.error{color:#ff8a80}}
+button[type=submit]{font:inherit;font-weight:700;background:var(--accent);color:var(--bg);border:0;border-radius:6px;padding:.7rem 1.4rem;cursor:pointer}
+button[type=submit]:disabled{opacity:.5;cursor:not-allowed}

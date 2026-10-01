@@ -9,13 +9,17 @@
  "glosario/index.html",
  "quienes-somos/index.html",
  "contacto/index.html",
+ "contacto/busco-un-seguro/index.html",
  "politica-de-privacidad/index.html",
  "politica-de-cookies/index.html",
  "terminos/index.html",
  "metodologia/index.html",
+ "contacto/gracias/index.html",
+ "contacto/mensaje/index.php",
  "index.html",
  "404.html",
  "sitemap.xml",
  "robots.txt",
- "assets/style.css"
+ "assets/style.css",
+ "assets/form.js"
 ]

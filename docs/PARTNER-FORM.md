@@ -189,3 +189,27 @@ return [
   lawyer at the optional review.
 - VenderCRM and the e-mail provider may be outside Paraguay (international
   transfer): confirm with the lawyer.
+
+## Implementation notes (2026-10-01, `contacto-alianzas.php`)
+
+Built as specified, with these deliberate differences. Tested by
+`tools/test-form.mjs` (27 checks, all passing against a mock CRM and `php -S`).
+
+- **Two steps instead of a radio:** `/contacto/` lets the visitor choose;
+  "Estoy buscando un seguro" goes to `/contacto/busco-un-seguro/` (no fields).
+  The form lives at `/contacto/mensaje/` (PHP, noindex), and the server rejects any
+  type that is not in the list, so deflection works without JavaScript.
+- **Types:** correction of a site fact, data request (access, correction, deletion),
+  aseguradora, corredor/agente, medio, agencia/proveedor, otro. The e-mail address
+  was removed from the site, so data-subject requests use this form.
+- **Organización** is required only for aseguradora, corredor, medio and agencia.
+- **Signed timestamp** (HMAC, needs the PHP page) replaces a bare time check:
+  under 3 s or forged → silent thank-you; over 2 h → "volvé a enviar".
+- **Rate limit** (5 per IP per hour) counts only submissions that passed
+  validation, so typos never lock someone out. Stored: a salted hash of the IP, for
+  one hour, in `storage/rate/` (git-ignored, denied by `.htaccess`).
+- **Consent label** uses "el titular de seguro.com.py" until `company.razonSocial`
+  is set in `site/site.json`.
+- The send button is disabled until the box is ticked by `assets/form.js`; without
+  JavaScript the button works and the server rejects a missing consent with the
+  red message "Para enviar el mensaje necesitamos tu autorización."

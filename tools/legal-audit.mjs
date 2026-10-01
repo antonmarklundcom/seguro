@@ -134,13 +134,14 @@ function audit(url, html) {
   }
   // Structure checks
   const forms = html.match(/<form\b[\s\S]*?<\/form>/gi) || [];
-  const isContact = /^\/(contacto|gracias-contacto)\/?$/.test(path);
+  const isContact = /^\/contacto(\/mensaje|\/gracias|\/busco-un-seguro)?\/?$/.test(path);
   if (forms.length && !isContact) add('form', `${forms.length} <form> outside /contacto`, 'form-outside-contact', 'high', 'No consumer forms. Remove, or confirm it is a search box or similar with no personal data.');
   if (isContact) {
     const f = forms.join(' ');
     if (forms.length && !/consent|consentimiento|acepto/i.test(f)) add('form', 'contact form without a consent checkbox', 'consent-missing', 'high', 'Add the consent box exactly as in docs/PARTNER-FORM.md.');
     if (/type=["']checkbox["'][^>]*\bchecked\b/i.test(f)) add('form', 'pre-ticked checkbox', 'consent-preticked', 'high', 'Consent must be unticked by default.');
-    if (/(cedula|c\.i\.|salud|enfermedad|patente|chapa|chasis|poliza n)/.test(norm(f))) add('form', 'consumer/health/vehicle field in the contact form', 'consumer-field', 'high', 'Remove: the partner form must not collect consumer or health data.');
+    const names = [...f.matchAll(/<(?:input|select|textarea)\b[^>]*\bname=["']([^"']+)["']/gi)].map((m) => norm(m[1]));
+    if (names.some((n) => /(cedula|ci_|salud|enfermedad|patente|chapa|chasis|poliza|vehiculo|marca|ingreso)/.test(n))) add('form', 'consumer/health/vehicle field in the contact form', 'consumer-field', 'high', 'Remove: the contact form must not collect consumer or health data.');
   }
   for (const m of html.matchAll(/<a\b[^>]*href=["']([^"']*(?:wa\.me|api\.whatsapp\.com|whatsapp:\/\/)[^"']*)["'][^>]*>/gi)) add('a', m[1].slice(0, 200), 'whatsapp-link', 'high', 'No consumer WhatsApp link in the information model.');
   for (const m of html.matchAll(/<img\b[^>]*>/gi)) {

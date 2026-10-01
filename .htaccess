@@ -2,7 +2,7 @@
 # This file keeps repo internals (docs, tools, build sources, git data) out of the web.
 
 Options -Indexes
-DirectoryIndex index.html
+DirectoryIndex index.html index.php
 ErrorDocument 404 /404.html
 
 <IfModule mod_rewrite.c>
@@ -15,10 +15,20 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # Never serve repository internals
 RewriteRule ^(docs|site|tools|\.git|storage)(/|$) - [R=404,L]
 RewriteRule ^(README|PLAN|CLAUDE)\.md$ - [R=404,L]
-RewriteRule (^|/)\.(git|env|htaccess)|\.(md|mjs|json|log|sh|php)$ - [R=404,L]
+RewriteRule (^|/)\.(git|env|htaccess)|\.(md|mjs|json|log|sh)$ - [R=404,L]
+
+# PHP: only the contact form page and its handler may be requested. config.php,
+# contacto-lib.php and any other .php file return 404.
+RewriteCond %{REQUEST_URI} !^/contacto-alianzas\.php$
+RewriteCond %{REQUEST_URI} !^/contacto/mensaje/(index\.php)?$
+RewriteRule \.php$ - [R=404,L]
 
 # Add known old URLs here as: Redirect 301 /old-path/ /guias/new-path/
 </IfModule>
+
+<FilesMatch "^(config|contacto-lib)\.php$">
+Require all denied
+</FilesMatch>
 
 <IfModule mod_headers.c>
 Header always set X-Content-Type-Options "nosniff"

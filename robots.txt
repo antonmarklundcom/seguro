@@ -3,5 +3,7 @@ Allow: /
 Disallow: /docs/
 Disallow: /site/
 Disallow: /tools/
+Disallow: /contacto/mensaje/
+Disallow: /contacto-alianzas.php
 
 Sitemap: https://seguro.com.py/sitemap.xml
