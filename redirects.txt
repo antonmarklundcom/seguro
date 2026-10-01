@@ -1,0 +1,27 @@
+# 301 redirects (source of truth). One pair per line: /old-path/ /new-path/
+# The build turns each line into a RedirectMatch rule in the generated .htaccess,
+# and verify.mjs checks that every target exists and no source is still a live page.
+# Reason for each group is in audit/seo-before-after.md.
+
+# Insurer directory profiles removed (named third-party companies) -> verification page
+/aseguradoras/aseguradora-del-este/ /aseguradoras/
+/aseguradoras/tajy/ /aseguradoras/
+/aseguradoras/la-consolidada/ /aseguradoras/
+/aseguradoras/sancor/ /aseguradoras/
+/aseguradoras/mapfre/ /aseguradoras/
+/aseguradoras/patria/ /aseguradoras/
+/aseguradoras/aseguradora-yacyreta/ /aseguradoras/
+/aseguradoras/el-comercio-paraguayo/ /aseguradoras/
+
+# Prepaga profiles removed (named providers) -> prepaga vs seguro guide
+/salud/migone/ /salud/
+/salud/asismed/ /salud/
+/salud/santa-clara/ /salud/
+
+# Calculator removed -> franquicia guide
+/calculadoras/deducible/ /guias/como-funciona-la-franquicia-o-deducible/
+
+# Blog posts about named companies -> nearest generic guide
+/blog/salud/como-comparar-asismed-santa-clara/ /blog/salud/como-elegir-medicina-prepaga/
+/blog/salud/que-cubre-un-plan-migone/ /blog/salud/como-elegir-medicina-prepaga/
+/blog/viajes/que-cubre-asistencia-tarjeta-itau/ /asistencia-al-viajero/tarjetas-de-credito/
