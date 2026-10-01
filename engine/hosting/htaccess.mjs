@@ -49,6 +49,9 @@ RewriteRule ^\\.well-known/ - [L]
 RedirectMatch 404 ^/engine(/|$)
 RedirectMatch 404 ^/sites(/|$)
 RedirectMatch 404 ^/deploy(/|$)
+RedirectMatch 404 ^/tools(/|$)
+RedirectMatch 404 ^/audit(/|$)
+RedirectMatch 404 ^/\.deployed-files$
 RedirectMatch 404 ^/docs(/|$)
 RedirectMatch 404 ^/prompts(/|$)
 RedirectMatch 404 ^/research(/|$)

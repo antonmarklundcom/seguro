@@ -37,16 +37,12 @@ Optional second opinion: serve the build (`npm run serve`) and run
 `npm run zip` → `dist/seguro-com-py-<date>.zip` (flat; contains the 3 PHP files, never `config.php`/`storage/`).
 Unzip into the domain's `public_html`.
 
-**B. hPanel → Advanced → Git.** `dist/` is git-ignored, so the repo root is not the website. Build a deploy branch that has
-the built site at its root:
+**B. hPanel → Advanced → Git, branch `main` (default).** `main` carries the built site at its root, next to the
+source. The generated `.htaccess` returns 404 for `engine/`, `sites/`, `deploy/`, `docs/`, `tools/`, `audit/`, `*.md`, `*.mjs`,
+`package.json`, `redirects.txt`, `config.example.php` and `.git`: check that after the first deploy (section 4).
 
-```bash
-npm run build && npm run verify
-node deploy/make-deploy-branch.mjs     # creates local branch deploy-site; never pushes
-git push <your-remote> deploy-site     # only when you decide to
-```
-
-Point hPanel Git at that remote and branch `deploy-site`.
+To release a change: `npm run publish` (build + verify + copy the site to the repo root), commit, merge to `main`, press Deploy.
+In hPanel: repository `https://github.com/antonmarklundcom/seguro.git`, branch `main`, install directory = the site folder.
 
 ## 3. Test subdomain first (e.g. a Hostinger subdomain or temporary domain)
 
@@ -60,7 +56,7 @@ Point hPanel Git at that remote and branch `deploy-site`.
 
 ```bash
 H=https://TEST-OR-REAL-HOST
-for p in /config.php /config.example.php /contacto-lib.php /storage/ /docs/ /redirects.txt /.git/config; do
+for p in /config.php /config.example.php /contacto-lib.php /storage/ /docs/ /engine/package.json /sites/seguro/site.config.mjs /package.json /audit/live-audit.md /tools/test-form.mjs /RELEASE-CHECKLIST.md /redirects.txt /.git/config; do
   echo "$p -> $(curl -s -o /dev/null -w '%{http_code}' $H$p)"; done            # all 404
 curl -sI $H/aseguradoras/tajy/ | head -3                                          # 301 → /aseguradoras/
 curl -sI $H/calculadoras/deducible/ | head -3                                     # 301 → franquicia guide
