@@ -141,3 +141,16 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# seguro.com.py (Node generator + contact form)
+*.zip
+.DS_Store
+Thumbs.db
+.claude/
+.codex/
+.agents/
+# Private: config.php holds the VenderCRM key and is uploaded by hand; never commit it.
+config.php
+storage/
+vendercrm-config.php
+vendercrm-lead-endpoints*.md

@@ -1,0 +1,18 @@
+{
+  "name": "seguro-com-py",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static informational portal for seguro.com.py, built with a dependency-free Node 24 generator.",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node engine/build-site.mjs --site=seguro",
+    "verify": "node engine/verify.mjs --site=seguro",
+    "serve": "node engine/serve.mjs --site=seguro --port=8080",
+    "test:form": "node tools/test-form.mjs",
+    "zip": "powershell -File deploy/make-zip.ps1",
+    "release": "npm run build && npm run verify && npm run zip"
+  }
+}
